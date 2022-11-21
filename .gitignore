@@ -1,2 +1,5 @@
 # Python generated files
 *.pyc
+
+# System generated files
+*.DS_Store
