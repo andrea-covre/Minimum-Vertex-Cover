@@ -10,11 +10,15 @@ import platform
 import psutil
 import logging
 import argparse
+import random
+
+from graph import Graph
+
 
 ALGOS = ['BnB', 'Approx', 'LS1', 'LS2']
 
 def print_sys_info():
-    """ Collects and prints system information. """
+    """ Collects and prints system information """
     
     try:
         info={}
@@ -46,10 +50,18 @@ def parse_args():
     return parser.parse_args()
 
 
-if __name__ == '__main__':
+def main():
+    """ Main function that executes the selected algorithm on the selected dataset """
     args = parse_args()
+    G = Graph("data/dummy1.graph")
+    print(G.v)
+    print(G.e)
+    for k, v in G.adj.items():
+        print(k, v)
+        
+    random.seed(args.seed)
+    print(random.randint(0, 1000))
+    
 
-    print(args.inst)
-    print(args.alg)
-    print(args.time)
-    print(args.seed)
+if __name__ == '__main__':
+    main()
