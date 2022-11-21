@@ -9,8 +9,13 @@ $ python -m exec -inst <filename> -alg [BnB|Approx|LS1|LS2] -time <cutoff in sec
 import platform
 import psutil
 import logging
+import argparse
+
+ALGOS = ['BnB', 'Approx', 'LS1', 'LS2']
 
 def print_sys_info():
+    """ Collects and prints system information. """
+    
     try:
         info={}
         info['platform'] = platform.system()
@@ -25,6 +30,26 @@ def print_sys_info():
     
     except Exception as e:
         logging.exception(e)
+        
+        
+def parse_args():
+    """ Parses the arguments passed to the script """
+    
+    # Creating the parser
+    parser = argparse.ArgumentParser(description='Run the selected algorithm on the selected dataset')
+    
+    parser.add_argument('-inst', type=str, help='path to graph dataset', required=True)
+    parser.add_argument('-alg', choices=ALGOS, help='algorithm to run', required=True)
+    parser.add_argument('-time', type=int, help='cutoff time in seconds', required=True)
+    parser.add_argument('-seed', type=int, help='random seed', required=True)
+    
+    return parser.parse_args()
+
 
 if __name__ == '__main__':
-    print("Ciao")
+    args = parse_args()
+
+    print(args.inst)
+    print(args.alg)
+    print(args.time)
+    print(args.seed)
