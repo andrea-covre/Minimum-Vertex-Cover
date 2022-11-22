@@ -8,7 +8,7 @@ from graph import Graph
 from utils import Timer, Trace
 
 
-def first_local_search(G: Graph, timer: Timer, trace: Trace) -> Tuple[int, List[int]]:
+def second_local_search(G: Graph, timer: Timer, trace: Trace) -> Tuple[int, List[int]]:
     """
     Second Local Search algorithm implementation.
     
@@ -42,5 +42,7 @@ def first_local_search(G: Graph, timer: Timer, trace: Trace) -> Tuple[int, List[
     # >>> if you need anything feel free to let Andrea know! <<<
     #
     ######################
+    
+    raise NotImplementedError("second_local_search in algos/LS2.py not implemented yet")
     
     return quality, solution

@@ -43,4 +43,6 @@ def first_local_search(G: Graph, timer: Timer, trace: Trace) -> Tuple[int, List[
     #
     ######################
     
+    raise NotImplementedError("first_local_search in algos/LS1.py not implemented yet")
+    
     return quality, solution

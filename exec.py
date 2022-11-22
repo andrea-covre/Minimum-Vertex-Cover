@@ -6,19 +6,24 @@ It can be executed following the required format:
 $ python -m exec -inst <filename> -alg [BnB|Approx|LS1|LS2] -time <cutoff in seconds> -seed <random seed>
 """
 
-
-import argparse
+import os
 import random
+import argparse
 
 from graph import Graph
+from utils import Timer, Trace, save_solution, get_sys_info
 from algos.BnB import branch_and_bound
+from algos.Approx import heuristic_with_approximation
+from algos.LS1 import first_local_search
+from algos.LS2 import second_local_search
 
 
+OUTPUT_DIR = 'output'
 ALGOS = {
     'BnB': branch_and_bound,
-    'Approx': None,
-    'LS1': None,
-    'LS2': None,
+    'Approx': heuristic_with_approximation,
+    'LS1': first_local_search,
+    'LS2': second_local_search,
 }
 
         
@@ -38,15 +43,58 @@ def parse_args():
 
 def main():
     """ Main function that executes the selected algorithm on the selected dataset """
+    
+    # Parsing the arguments
     args = parse_args()
-    G = Graph("data/dummy1.graph")
-    print(G.v)
-    print(G.e)
-    for k, v in G.adj.items():
-        print(k, v)
-        
+    
+    # Setting the random seed
     random.seed(args.seed)
-    print(random.randint(0, 1000))
+    
+    # Loading the graph
+    G = Graph(args.inst)
+    
+    # Printing system, execution, and graph info
+    print("========= System Info =========")
+    for key, value in get_sys_info().items():
+        print(f"{key + ':':<20} {value}")
+        
+    print("\n========= Arguments =========")
+    for arg in vars(args):
+        print(f"{arg + ':':<20} {getattr(args, arg)}")
+        
+    instance_name = os.path.splitext(os.path.basename(args.inst))[0]
+    print("\n========= Graph =========")
+    print(f"{'Graph name:':<20} {instance_name}")
+    print(f"{'Number of vertices:':<20} {G.v}")
+    print(f"{'Number of edges:':<20} {G.e}")
+    
+    # Creating the timer and the trace
+    timer = Timer(args.time)
+    trace = Trace(timer)
+    
+    # Running the selected algorithm
+    print(f"\n>> Running {args.alg} on {instance_name}...\n")
+    timer.start()
+    quality, solution = ALGOS[args.alg](G, timer, trace)
+    time_elapsed = timer.elapsed()
+    
+    # Printing results
+    print("\n========= Results =========")
+    print(f"{'Solution found:':<20} {solution}")
+    print(f"{'Quality of solution:':<20} {quality}")
+    print(f"{'Solution coverage:':<20} {(quality/G.v)*100:.2f}%")
+    print(f"{'Time elapsed:':<20} {time_elapsed} s")
+    print(f"{'Graph reads:':<20} {G._accesses_count}")
+    print("")
+    
+    # Creating output files
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    
+    output_name = f"{instance_name}_{args.alg}_{args.time}_{args.seed}"   # TODO: change output name to exclude seed when algo is deterministic
+    
+    trace.save(os.path.join(OUTPUT_DIR, f"{output_name}.trace"))
+    save_solution(os.path.join(OUTPUT_DIR, f"{output_name}.sol"), quality, solution)
+    
     
 
 if __name__ == '__main__':

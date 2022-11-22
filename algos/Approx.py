@@ -43,4 +43,6 @@ def heuristic_with_approximation(G: Graph, timer: Timer, trace: Trace) -> Tuple[
     #
     ######################
     
+    raise NotImplementedError("heuristic_with_approximation in algos/Approx.py not implemented yet")
+    
     return quality, solution

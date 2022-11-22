@@ -26,7 +26,7 @@ class Graph:
         """
         
         self.adj = {}
-        self.__accesses_count = 0
+        self._accesses_count = 0
         
         if not os.path.exists(path):
             raise FileNotFoundError(f"Graph file not found at {path}")

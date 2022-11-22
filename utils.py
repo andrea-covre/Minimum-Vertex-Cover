@@ -7,6 +7,7 @@ import psutil
 import logging
 
 from time import time
+from typing import List
 
                          
 class Timer:
@@ -14,8 +15,8 @@ class Timer:
     
     def __init__(self, time_limit: int):
         """ Constructor for the Timer class """
-        self.time_limit = None
-        self.start_time = time_limit
+        self.time_limit = time_limit
+        self.start_time = None
         
     def start(self):
         """ Starts the timer """
@@ -45,9 +46,21 @@ class Trace:
     def save(self, path: str):
         """ Saves the trace to a file """
         with open(path, 'w') as f:
-            for record in self.list:
-                f.write(f"{record}\n")
-
+            for idx, record in enumerate(self.list):
+                f.write(str(record)[1:-1])
+                if idx != len(self.list) - 1:
+                    f.write('\n')
+        print(f"Trace saved to {path}")
+                
+                
+def save_solution(path: str, quality: int, solution: List[int]):
+    """ Saves the algoirthm solution to a file """
+    
+    formatted_solution = str(solution)[1:-1].replace(" ", "")
+    with open(path, 'w') as f:
+        f.write(f"{quality}\n{formatted_solution}")
+    print(f"Solution saved to {path}")
+        
 
 def get_sys_info():
     """ Collects and prints system information """
