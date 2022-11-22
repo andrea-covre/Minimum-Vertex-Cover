@@ -6,35 +6,21 @@ It can be executed following the required format:
 $ python -m exec -inst <filename> -alg [BnB|Approx|LS1|LS2] -time <cutoff in seconds> -seed <random seed>
 """
 
-import platform
-import psutil
-import logging
+
 import argparse
 import random
 
 from graph import Graph
+from algos.BnB import branch_and_bound
 
 
-ALGOS = ['BnB', 'Approx', 'LS1', 'LS2']
+ALGOS = {
+    'BnB': branch_and_bound,
+    'Approx': None,
+    'LS1': None,
+    'LS2': None,
+}
 
-def print_sys_info():
-    """ Collects and prints system information """
-    
-    try:
-        info={}
-        info['platform'] = platform.system()
-        info['platform-release'] = platform.release()
-        info['platform-version'] = platform.version()
-        info['architecture'] = platform.machine()
-        info['processor'] = platform.processor()
-        info['ram'] = str(round(psutil.virtual_memory().total / (1024.0 **3)))+" GB"
-    
-        for k, v in info.items():
-            print(f"{k}: {v}")
-    
-    except Exception as e:
-        logging.exception(e)
-        
         
 def parse_args():
     """ Parses the arguments passed to the script """
@@ -43,7 +29,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description='Run the selected algorithm on the selected dataset')
     
     parser.add_argument('-inst', type=str, help='path to graph dataset', required=True)
-    parser.add_argument('-alg', choices=ALGOS, help='algorithm to run', required=True)
+    parser.add_argument('-alg', choices=ALGOS.keys(), help='algorithm to run', required=True)
     parser.add_argument('-time', type=int, help='cutoff time in seconds', required=True)
     parser.add_argument('-seed', type=int, help='random seed', required=True)
     
