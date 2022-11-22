@@ -3,6 +3,7 @@ This file contains the logic needed to load a graph from a file.
 """
 
 import os
+from typing import List
 
 class Graph:
     """
@@ -43,7 +44,7 @@ class Graph:
                 self.adj[current_node_idx] = [int(x) for x in line.split()]
                 current_node_idx += 1
                 
-    def get_neighbours(self, node: int) -> list:
+    def get_neighbours(self, node: int) -> List[int]:
         """
         Returns the list of neighbours of the given node
         
@@ -56,3 +57,7 @@ class Graph:
         self._accesses_count += 1
         
         return self.adj[node]
+    
+    def get_all_nodes(self) -> List[int]:
+        """ Returns the list of all nodes in the graph """
+        return list(self.adj.keys())
