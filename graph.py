@@ -27,6 +27,7 @@ class Graph:
         
         self.adj = {}
         self._accesses_count = 0
+        self._vertex_cover_check_count = 0
         
         if not os.path.exists(path):
             raise FileNotFoundError(f"Graph file not found at {path}")
@@ -57,6 +58,22 @@ class Graph:
         self._accesses_count += 1
         
         return self.adj[node]
+    
+    def check_vertex_cover(self, vertex_cover: List[int]) -> int:
+        """
+        Returns the number of vertexes covered by the given vertex cover
+        
+        :param vertex_cover: list of nodes that compose the vertex cover
+        :return: the number of vertexes covered by the vertex cover
+        """
+        self._vertex_cover_check_count += 1
+        
+        cover = set()
+        for node in vertex_cover:
+            cover.add(node)
+            cover.update(self.get_neighbours(node))
+        
+        return len(cover)
     
     def get_all_nodes(self) -> List[int]:
         """ Returns the list of all nodes in the graph """
