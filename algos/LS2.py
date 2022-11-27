@@ -2,16 +2,22 @@
 This file contains the logic for the Second Local Search algorithm.
 """
 
+import random
 from typing import Tuple, List
 
 from graph import Graph
 from utils import Timer, Trace
 
+POPULATION_SIZE = 100
 
 class LS2:
-    IS_DETERMINISTIC = None
+    IS_DETERMINISTIC = False
     
-    def get_vertex_cover(G: Graph, timer: Timer, trace: Trace) -> Tuple[int, List[int]]:
+    def __init__(self):
+        """ Constructor for the LS2 class """
+        raise ValueError("IS_DETERMINISTIC must be set to True or False") if self.IS_DETERMINISTIC == None else None
+    
+    def get_vertex_cover(self, G: Graph, timer: Timer, trace: Trace) -> Tuple[int, List[int]]:
         """
         Second Local Search algorithm implementation.
         
@@ -25,28 +31,43 @@ class LS2:
             solution: best solution found as list of nodes
         """
         
+        self.G = G
+        self.timer = timer
+        self.trace = trace
+        
         quality = None
         solution = None
         
-        ######################
-        ### YOUR CODE HERE ###
-        ######################
-        # ===== Useful info: =====
-        # > feel free to import the random module if needed, but do not worry about setting the seed as it is already set globally in exec.py
-        # > G.v is the number of nodes in the graph
-        # > G.e is the number of edges in the graph
-        # > G.get_neighbours(node) returns the list of neighbours of the given node (use this API to access the graph, so that the accesses count is updated)
-        # > G.get_all_nodes() returns the list of all nodes in the graph
-        # > G.check_vertex_cover(vertex_cover) returns the number of vertexes covered by the vertex cover (use this API, so that the vertex cover checks count is updated)
-        # > the nodes in the graph are numbered from 1 to G.v
-        # > use timer.cutoff() to check if the time limit has been exceeded and you need to stop the algorithm
-        # > use trace.add_record(quality) to add a new record to the trace, do not worry about the timestamp (as it is added automatically) or about saving the file 
-        # > return the best solution found (as a list of nodes) and its quality (number of edges covered)
-        #
-        # >>> if you need anything feel free to let Andrea know! <<<
-        #
-        ######################
+        population = init_population(G)
+        for individual in population:
+            print(individual, )
         
-        raise NotImplementedError("second_local_search in algos/LS2.py not implemented yet")
-        
+    
+        quality = 0
+        solution = 0
         return quality, solution
+    
+    
+def init_population(G: Graph) -> List[List[int]]:
+    """ Initiating population with a list of random vertex covers"""
+    
+    population = []
+    all_nodes = G.get_all_nodes()
+    
+    for i in range(POPULATION_SIZE):
+        # Create a random vertex cover of size ranging from 1 to G.v
+        individual = random.sample(all_nodes, random.randint(1, G.v))            
+        population.append(individual)
+        
+    return population
+
+
+def get_fitness(G: Graph, population: List[List[int]]) -> List[int]:
+    """ Evaluating fitness of each individual in the population """
+    
+    fitness = []
+    
+    for individual in population:
+        fitness.append(G.check_vertex_cover(individual))
+        
+    return fitness
