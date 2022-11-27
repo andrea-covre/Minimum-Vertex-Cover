@@ -20,10 +20,22 @@ from algos.LS2 import second_local_search
 
 OUTPUT_DIR = 'output'
 ALGOS = {
-    'BnB': branch_and_bound,
-    'Approx': heuristic_with_approximation,
-    'LS1': first_local_search,
-    'LS2': second_local_search,
+    'BnB': {
+        "func": branch_and_bound,
+        "deterministic": False,         # TODO: confirm if is deterministic
+    },
+    'Approx': {
+        "func": heuristic_with_approximation,
+        "deterministic": False,         # TODO: confirm if is deterministic
+    },
+    'LS1': {
+        "func": first_local_search,
+        "deterministic": False,         # TODO: confirm if is deterministic
+    },
+    'LS2': {
+        "func": second_local_search,
+        "deterministic": False,         # TODO: confirm if is deterministic
+    }
 }
 
         
@@ -53,6 +65,9 @@ def main():
     # Loading the graph
     G = Graph(args.inst)
     
+    # Getting the algorithm to run
+    algorithm = ALGOS[args.alg]["func"]
+    
     # Printing system, execution, and graph info
     print("========= System Info =========")
     for key, value in get_sys_info().items():
@@ -75,7 +90,7 @@ def main():
     # Running the selected algorithm
     print(f"\n>> Running {args.alg} on {instance_name}...\n")
     timer.start()
-    quality, solution = ALGOS[args.alg](G, timer, trace)
+    quality, solution = algorithm(G, timer, trace)
     time_elapsed = timer.elapsed()
     
     # Printing results
@@ -88,9 +103,13 @@ def main():
     print("")
     
     # Creating output files
+    is_deterministic = ALGOS[args.alg]["deterministic"]
+    
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     
-    output_name = f"{instance_name}_{args.alg}_{args.time}_{args.seed}"   # TODO: change output name to exclude seed when algo is deterministic
+    output_name = f"{instance_name}_{args.alg}_{args.time}"
+    if not is_deterministic:
+        output_name = f"{output_name}_{args.seed}"
     
     trace.save(os.path.join(OUTPUT_DIR, f"{output_name}.trace"))
     save_solution(os.path.join(OUTPUT_DIR, f"{output_name}.sol"), quality, solution)

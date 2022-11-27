@@ -44,6 +44,8 @@ def branch_and_bound(G: Graph, timer: Timer, trace: Trace) -> Tuple[int, List[in
     #
     ######################
     
-    raise NotImplementedError("branch_and_bound in algos/BnB.py not implemented yet")
+    #raise NotImplementedError("branch_and_bound in algos/BnB.py not implemented yet")
+    quality = 0
+    solution = 0
     
     return quality, solution
