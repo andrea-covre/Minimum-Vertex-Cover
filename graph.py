@@ -79,6 +79,15 @@ class Graph:
         """ Returns the number of edges covered by the given vertex cover """
         return len(self.get_covered_edges(vertex_cover))
     
+    def is_vertex_cover(self, vertex_cover: List[int]) -> bool:
+        """
+        Returns True if the given vertex cover is a vertex cover of the graph
+        
+        :param vertex_cover: list of nodes that compose the vertex cover
+        :return: True if the given vertex cover is a vertex cover of the graph, False otherwise
+        """
+        return self.count_covered_edges(vertex_cover) == self.e
+    
     def get_all_nodes(self) -> List[int]:
         """ Returns the list of all nodes in the graph """
         return list(self.adj.keys())
