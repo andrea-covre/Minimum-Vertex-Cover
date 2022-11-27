@@ -44,6 +44,8 @@ class Graph:
             for line in lines[1:]:
                 self.adj[current_node_idx] = [int(x) for x in line.split()]
                 current_node_idx += 1             
+        
+        self.all_nodes = self.adj.keys()
                 
     def get_neighbours(self, node: int) -> List[int]:
         """
@@ -91,7 +93,3 @@ class Graph:
     def get_solution_quality(self, solution: List[int]) -> int:
         """ Returns the quality of the given solution """
         return len(solution)
-    
-    def get_all_nodes(self) -> List[int]:
-        """ Returns the list of all nodes in the graph """
-        return list(self.adj.keys())

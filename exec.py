@@ -85,7 +85,6 @@ def main():
     print("\n========= Results =========")
     print(f"{'Solution found:':<20} {solution}")
     print(f"{'Quality of solution:':<20} {quality}")
-    print(f"{'Solution coverage:':<20} {(quality/G.v)*100:.2f}%")
     print(f"{'Time elapsed:':<20} {time_elapsed} s")
     print(f"{'Graph reads:':<20} {G._accesses_count}")
     print("")
