@@ -3,7 +3,7 @@ This file contains the logic needed to load a graph from a file.
 """
 
 import os
-from typing import List
+from typing import List, Set
 
 class Graph:
     """
@@ -43,7 +43,7 @@ class Graph:
             current_node_idx = 1
             for line in lines[1:]:
                 self.adj[current_node_idx] = [int(x) for x in line.split()]
-                current_node_idx += 1
+                current_node_idx += 1             
                 
     def get_neighbours(self, node: int) -> List[int]:
         """
@@ -59,21 +59,25 @@ class Graph:
         
         return self.adj[node]
     
-    def check_vertex_cover(self, vertex_cover: List[int]) -> int:
+    def get_covered_edges(self, vertex_cover: List[int]) -> Set[frozenset]:
         """
-        Returns the number of vertexes covered by the given vertex cover
+        Returns the edges covered by the given vertex cover
         
         :param vertex_cover: list of nodes that compose the vertex cover
-        :return: the number of vertexes covered by the vertex cover
+        :return: a set of frozensets, each frozenset represents an edge
         """
         self._vertex_cover_check_count += 1
         
-        cover = set()
+        covered_edges = set()
         for node in vertex_cover:
-            cover.add(node)
-            cover.update(self.get_neighbours(node))
-        
-        return len(cover)
+            for neighbour in self.get_neighbours(node):
+                covered_edges.add(frozenset([node, neighbour]))
+
+        return covered_edges
+    
+    def count_covered_edges(self, vertex_cover: List[int]) -> int:
+        """ Returns the number of edges covered by the given vertex cover """
+        return len(self.get_covered_edges(vertex_cover))
     
     def get_all_nodes(self) -> List[int]:
         """ Returns the list of all nodes in the graph """

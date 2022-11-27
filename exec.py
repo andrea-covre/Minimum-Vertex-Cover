@@ -94,8 +94,6 @@ def main():
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     
     output_name = f"{instance_name}_{args.alg}_{args.time}"
-    print("OOOO")
-    print(algorithm.IS_DETERMINISTIC)
     if algorithm.IS_DETERMINISTIC == False:
         output_name = f"{output_name}_{args.seed}"
     
