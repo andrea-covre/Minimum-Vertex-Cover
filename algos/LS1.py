@@ -13,7 +13,7 @@ class LS1:
     
     def __init__(self):
         """ Constructor for the LS1 class """
-        raise ValueError("IS_DETERMINISTIC must be set to True or False") if self.IS_DETERMINISTIC == None else None
+        if self.IS_DETERMINISTIC == None: raise ValueError("IS_DETERMINISTIC must be set to True or False")
     
     def get_vertex_cover(self, G: Graph, timer: Timer, trace: Trace) -> Tuple[int, List[int]]:
         """
