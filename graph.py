@@ -88,6 +88,12 @@ class Graph:
         """
         return self.count_covered_edges(vertex_cover) == self.e
     
+    def get_solution_quality(self, solution: List[int]) -> int:
+        """ Returns the quality of the given solution """
+        if not self.is_vertex_cover(solution):
+            raise ValueError("The given solution is not a vertex cover")
+        return len(solution)
+    
     def get_all_nodes(self) -> List[int]:
         """ Returns the list of all nodes in the graph """
         return list(self.adj.keys())
