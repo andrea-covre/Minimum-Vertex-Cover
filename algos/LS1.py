@@ -11,7 +11,11 @@ from utils import Timer, Trace
 class LS1:
     IS_DETERMINISTIC = None
     
-    def get_vertex_cover(G: Graph, timer: Timer, trace: Trace) -> Tuple[int, List[int]]:
+    def __init__(self):
+        """ Constructor for the LS1 class """
+        raise ValueError("IS_DETERMINISTIC must be set to True or False") if self.IS_DETERMINISTIC == None else None
+    
+    def get_vertex_cover(self, G: Graph, timer: Timer, trace: Trace) -> Tuple[int, List[int]]:
         """
         First Local Search algorithm implementation.
         
@@ -24,6 +28,10 @@ class LS1:
             quality: quality of the best solution found
             solution: best solution found as list of nodes
         """
+        
+        self.G = G
+        self.timer = timer
+        self.trace = trace
         
         quality = None
         solution = None

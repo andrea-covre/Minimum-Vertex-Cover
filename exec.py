@@ -54,7 +54,7 @@ def main():
     G = Graph(args.inst)
     
     # Getting the algorithm to run
-    algorithm = ALGOS[args.alg]
+    algorithm = ALGOS[args.alg]()
     
     # Printing system, execution, and graph info
     print("========= System Info =========")
@@ -98,9 +98,6 @@ def main():
     print(algorithm.IS_DETERMINISTIC)
     if algorithm.IS_DETERMINISTIC == False:
         output_name = f"{output_name}_{args.seed}"
-        
-    elif algorithm.IS_DETERMINISTIC == None:
-        raise ValueError("IS_DETERMINISTIC must be set to True or False")
     
     trace.save(os.path.join(OUTPUT_DIR, f"{output_name}.trace"))
     save_solution(os.path.join(OUTPUT_DIR, f"{output_name}.sol"), quality, solution)
