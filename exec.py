@@ -12,30 +12,18 @@ import argparse
 
 from graph import Graph
 from utils import Timer, Trace, save_solution, get_sys_info
-from algos.BnB import branch_and_bound
-from algos.Approx import heuristic_with_approximation
-from algos.LS1 import first_local_search
-from algos.LS2 import second_local_search
+from algos.BnB import BnB
+from algos.Approx import Approx
+from algos.LS1 import LS1
+from algos.LS2 import LS2
 
 
 OUTPUT_DIR = 'output'
 ALGOS = {
-    'BnB': {
-        "func": branch_and_bound,
-        "deterministic": False,         # TODO: confirm if is deterministic
-    },
-    'Approx': {
-        "func": heuristic_with_approximation,
-        "deterministic": False,         # TODO: confirm if is deterministic
-    },
-    'LS1': {
-        "func": first_local_search,
-        "deterministic": False,         # TODO: confirm if is deterministic
-    },
-    'LS2': {
-        "func": second_local_search,
-        "deterministic": False,         # TODO: confirm if is deterministic
-    }
+    'BnB': BnB,
+    'Approx': Approx,
+    'LS1': LS1,
+    'LS2': LS2,
 }
 
         
@@ -66,7 +54,7 @@ def main():
     G = Graph(args.inst)
     
     # Getting the algorithm to run
-    algorithm = ALGOS[args.alg]["func"]
+    algorithm = ALGOS[args.alg]
     
     # Printing system, execution, and graph info
     print("========= System Info =========")
@@ -90,7 +78,7 @@ def main():
     # Running the selected algorithm
     print(f"\n>> Running {args.alg} on {instance_name}...\n")
     timer.start()
-    quality, solution = algorithm(G, timer, trace)
+    quality, solution = algorithm.get_vertex_cover(G, timer, trace)
     time_elapsed = timer.elapsed()
     
     # Printing results
@@ -103,13 +91,16 @@ def main():
     print("")
     
     # Creating output files
-    is_deterministic = ALGOS[args.alg]["deterministic"]
-    
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     
     output_name = f"{instance_name}_{args.alg}_{args.time}"
-    if not is_deterministic:
+    print("OOOO")
+    print(algorithm.IS_DETERMINISTIC)
+    if algorithm.IS_DETERMINISTIC == False:
         output_name = f"{output_name}_{args.seed}"
+        
+    elif algorithm.IS_DETERMINISTIC == None:
+        raise ValueError("IS_DETERMINISTIC must be set to True or False")
     
     trace.save(os.path.join(OUTPUT_DIR, f"{output_name}.trace"))
     save_solution(os.path.join(OUTPUT_DIR, f"{output_name}.sol"), quality, solution)
