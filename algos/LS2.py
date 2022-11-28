@@ -3,17 +3,25 @@ This file contains the logic for the Second Local Search algorithm.
 """
 
 import random
+import numpy as np
 from typing import Tuple, List
-from dataclasses import dataclass
 
 from graph import Graph
 from utils import Timer, Trace
 
-POPULATION_SIZE = 100
+INITIALIZATION_MODE = "lognorm" # "lognorm" | "uniform"
+POPULATION_SIZE = 1000
 CROSSOVER_RATE = 0.5
-MUTATION_RATE = 0.5
+MUTATION_RATE = 0.06
+MUTATION_MODE = "switch" # "batch" | "switch"
+SIZE_PENALTY_MULTIPLIER = 1.1
 
-# TODO: try to start from all nodes and then minimize them in the solution
+class LOGNORMAL_PARAM:
+    MU = 1
+    SIGMA = 0.9
+    DISTRIBUTION_RANGE = [0, 50]
+
+DEBUG = False
 
 class LS2:
     IS_DETERMINISTIC = False
@@ -50,11 +58,19 @@ class LS2:
         population = self.init_population()
         population_fitness, total_fitness = self.get_population_fitness(population)
         
+        average_size = sum([len(individual) for individual in population]) / len(population)
+        print("init average size:", average_size) if DEBUG else None
+        
         # Generation loop
         geration = 0
         while not timer.cutoff():
             # Find mating probabilities
             mating_probabilities = self.get_mating_probability(population_fitness, total_fitness)
+            
+            # print(f"Avg. Fit: {int(total_fitness/POPULATION_SIZE)}")
+            # for individual, fitness, prob in zip(population, population_fitness, mating_probabilities):
+            #     print("size", len(individual), "cov", self.G.count_covered_edges(individual), " | fitness", self.get_fitness(individual), " | prob", prob)
+            
             
             # Create next generation
             population = self.make_next_generation(population, mating_probabilities)
@@ -66,8 +82,11 @@ class LS2:
             self.update_best_solution(population, population_fitness)
             
             # Print progress
-            average_size = int(sum([len(individual) for individual in population]) / len(population))
-            print(f"\tGen: {geration} - Avg. Fit: {int(total_fitness/POPULATION_SIZE)} - Avg. Size: {average_size} - Best Sol Quality: {self.quality}")
+            sizes = [len(individual) for individual in population]
+            average_size = sum(sizes) / len(population)
+            variance = sum([((x - average_size) ** 2) for x in sizes]) / len(sizes)
+            std = round(variance ** 0.5, 3)
+            print(f"\tGen: {geration} | Avg. Fit: {int(total_fitness/POPULATION_SIZE)} | Avg. Size: {average_size} | Std. Size: {std} | Best Sol Quality: {self.quality}")
             
             geration += 1
             
@@ -83,12 +102,50 @@ class LS2:
         population = []
         all_nodes = self.G.all_nodes
         
+        if INITIALIZATION_MODE == "uniform":
+            get_number_of_nodes = lambda: random.randint(1, self.G.v)
+            
+        elif INITIALIZATION_MODE == "normal":
+            get_number_of_nodes = lambda: int(np.random.normal(self.G.v/2, self.G.v/4))
+            
+        elif INITIALIZATION_MODE == "lognorm":
+            get_number_of_nodes = self.get_lognormal_vertexes_count
+            
+        else:
+            raise ValueError("Invalid initialization mode")
+            
         for i in range(POPULATION_SIZE):
-            # Create a random vertex cover of size ranging from 1 to G.v
-            individual = random.sample(all_nodes, random.randint(1, self.G.v))  
+            # Create a random vertex cover of size ranging from 1 to G.v, with the given distribution mode
+            number_of_vertexes = get_number_of_nodes()
+
+            individual = random.sample(all_nodes, number_of_vertexes)  
+            print(number_of_vertexes, len(individual)) if DEBUG else None
             population.append(individual)
             
         return population
+    
+    
+    def get_lognormal_vertexes_count(self):
+        """ Returns a random number from an inversed lognormal distribution mapped to the vertexes range """
+        sample = np.random.lognormal(LOGNORMAL_PARAM.MU, LOGNORMAL_PARAM.SIGMA)
+        
+        src_lower_bound = LOGNORMAL_PARAM.DISTRIBUTION_RANGE[0]
+        src_upper_bound = LOGNORMAL_PARAM.DISTRIBUTION_RANGE[1]
+        
+        dst_lower_bound = 0
+        dst_upper_bound = self.G.v
+        
+        dst_span = dst_upper_bound - dst_lower_bound
+        src_span = src_upper_bound - src_lower_bound
+        
+        valueScaled = float(sample - src_lower_bound) / float(src_span)
+        mapped_sample = dst_lower_bound + (valueScaled * dst_span)
+        
+        random_vertex_count = int(self.G.v - mapped_sample)
+        
+        if random_vertex_count < 0: random_vertex_count = 0
+        
+        return random_vertex_count
 
 
     def get_fitness(self, individual: List[int]) -> List[int]:
@@ -96,7 +153,14 @@ class LS2:
         if len(individual) == 0: 
             return 0
         
-        return self.G.count_covered_edges(individual) * 100 - len(individual)
+        covered_edges = self.G.count_covered_edges(individual) 
+        
+        denominator = self.G.e - covered_edges + len(individual) * SIZE_PENALTY_MULTIPLIER
+        if denominator == 0: denominator = 0.001
+        
+        return (self.G.e / denominator) #/ len(individual)
+
+        return (covered_edges * 10 - len(individual))
     
     
     def get_population_fitness(self, population: List[List[int]]) -> Tuple[List[int], float]:
@@ -127,13 +191,20 @@ class LS2:
             # Selecting two parents
             parents = random.choices(current_population, weights=mating_probabilities, k=2)
             
+            print("parent 1 size:", len(parents[0]), "parent 2 size:", len(parents[1])) if DEBUG else None
+            
             # Creating a child by crossing over the parents
             child = self.crossover(parents[0], parents[1])
+            
+            print("cross child size:", len(child)) if DEBUG else None
             
             # Mutating the child
             child = self.mutate(child)
             
+            print("mut child size:", len(child), "\n") if DEBUG else None
+            
             next_gen.append(child)
+            
             
         return next_gen
     
@@ -152,12 +223,29 @@ class LS2:
     
     def mutate(self, individual: List[int]) -> List[int]:
         """ Mutating the individual adding and/or removing nodes """  
-        changing_nodes = random.sample(self.G.all_nodes, self.mutating_nodes)
-        for node in changing_nodes:
-            if node in individual:
-                individual.remove(node)
-            else:
-                individual.append(node)
+        
+        if MUTATION_MODE == "batch":
+            changing_nodes = random.sample(self.G.all_nodes, self.mutating_nodes)
+            for node in changing_nodes:
+                if node in individual:
+                    individual.remove(node)
+                else:
+                    individual.append(node)
+                    
+        elif MUTATION_MODE == "switch":                
+            while random.random() < MUTATION_RATE:
+                if len(individual) == 0: break
+                active_node = random.choice(individual)
+                individual.remove(active_node)
+                
+            while random.random() < MUTATION_RATE:
+                inactive_nodes = list( set(self.G.all_nodes).difference(set(individual)) )
+                if len(inactive_nodes) == 0: break
+                inactive_node = random.choice(inactive_nodes)
+                individual.append(inactive_node)
+                    
+        else:
+            raise ValueError("Invalid mutation mode")
                 
         return individual
     
