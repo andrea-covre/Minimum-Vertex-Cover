@@ -76,6 +76,25 @@ class Graph:
                 covered_edges.add(frozenset([node, neighbour]))
 
         return covered_edges
+
+    def get_all_edges(self) -> Set[frozenset]:
+        """
+        Returns all edges in G
+        
+        :param 
+        :return: a set of frozensets, each frozenset represents an edge
+        """
+        
+        all_edges = set()
+        for node in self.all_nodes:
+            for neighbour in self.get_neighbours(node):
+                all_edges.add(frozenset([node, neighbour]))
+
+        return all_edges
+
+    def get_uncovered_edges(self, vertex_cover: List[int]) -> Set[frozenset]:
+        """ Returns the edges not covered by the given vertex cover """
+        return self.get_all_edges().difference(self.get_covered_edges(vertex_cover))
     
     def count_covered_edges(self, vertex_cover: List[int]) -> int:
         """ Returns the number of edges covered by the given vertex cover """
