@@ -96,6 +96,14 @@ class Graph:
         """ Returns the edges not covered by the given vertex cover """
         return self.get_all_edges().difference(self.get_covered_edges(vertex_cover))
     
+    def get_nodes_to_add(self, vertex_cover: List[int]) -> List[int]:
+        """ Returns possible nodes to add into the cover """
+        nodes_to_add=set()
+        for node1, node2 in self.get_uncovered_edges(vertex_cover):
+            nodes_to_add.add(node1)
+            nodes_to_add.add(node2)
+        return list(nodes_to_add)
+
     def count_covered_edges(self, vertex_cover: List[int]) -> int:
         """ Returns the number of edges covered by the given vertex cover """
         return len(self.get_covered_edges(vertex_cover))

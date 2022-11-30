@@ -56,7 +56,7 @@ class Approx:
         ######################
 
         #G_remaining = deepcopy(G)
-        G_rem=G.adj.copy()
+        G_rem=deepcopy(G.adj)
         G_nodes=G_rem.keys()
         G_e=G.e
         G_v=G.v
