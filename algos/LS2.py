@@ -61,7 +61,7 @@ class LS2:
         self.mutating_nodes = int(self.G.v * MUTATION_RATE)
         
         # Initiating population and evaluating its fitness
-        print("\tInitiating population")
+        print("\tInitiating population\n")
         population = self.init_population()
         population_fitness, total_fitness = self.get_population_fitness(population)
         
