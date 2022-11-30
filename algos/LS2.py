@@ -9,6 +9,11 @@ from typing import Tuple, List
 from graph import Graph
 from utils import Timer, Trace
 
+# TODO: try adjusting parameters based on the graph size
+# TODO: clean unused/commented parts
+# TODO: clean DEBUG print statements
+# TODO: print paramenters used [???]
+
 # Parameters
 INITIALIZATION_MODE = "near_trivial" # "lognorm" | "uniform" | "normal" | "near_trivial"
 POPULATION_SIZE = 500
