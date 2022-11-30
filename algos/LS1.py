@@ -8,12 +8,14 @@ from typing import Tuple, List
 
 from graph import Graph
 from utils import Timer, Trace
-from Approx import Approx
+from algos.Approx import Approx
 
-INITIALIZATION_MODE = "Approx"  # "Approx" | "full"
-INITIAL_TEMPERATURE = 10
+INITIALIZATION_MODE = "full"  # "Approx" | "full"
+INITIAL_TEMPERATURE = 100
 COOLING_RATE = 0.95
+END_TEMPERATURE = 0.001
 
+DEBUG=True
 
 class LS1:
     IS_DETERMINISTIC = False
@@ -47,20 +49,27 @@ class LS1:
 
         # Initialize a vertex cover
         self.init_cover()
-        self.temperature = INITIAL_TEMPERATURE
+        self.temperature = G.v**0.5
+
         while not timer.cutoff():
+            
+            if self.temperature < END_TEMPERATURE:
+                break
+
             # remove an vertex if the solution is already a vertex cover
             if self.G.is_vertex_cover(self.solution):
                 solution = self.solution
                 self.quality = self.G.get_solution_quality(solution)
                 self.trace.add_record(self.quality)
-                self.solution.remove(random.choices(
-                    self.G.all_nodes, self.get_remove_probability(), k=1))
+                print(f"Current quality:{self.quality}") if DEBUG else None
+                self.solution.remove(random.choices(self.solution, self.get_remove_probability(), k=1)[0])
                 continue
 
             # add a vertex if the solution is not a vertex cover
-            self.solution.add(random.choices(
-                self.G.all_nodes, self.get_add_probability(), k=1))
+            self.rem=list(set(self.G.all_nodes).difference(set(self.solution)))
+            choice=random.choice(self.rem)
+            if random.random()<self.get_add_probability(choice):
+                self.solution.append(choice)
 
             self.temperature = self.temperature * COOLING_RATE
 
@@ -70,42 +79,49 @@ class LS1:
         """ Initiating a vertex cover"""
 
         if INITIALIZATION_MODE == "Approx":
-            self.quality, self.solution = Approx.get_vertex_cover(
+            appr=Approx()
+            self.quality, self.solution = appr.get_vertex_cover(
                 self.G, self.timer, self.trace)
 
-        if INITIALIZATION_MODE == "full":
+        elif INITIALIZATION_MODE == "full":
             self.quality = self.G.v
-            self.solution = self.G.all_nodes
+            self.solution = list(self.G.all_nodes)
 
         else:
             raise ValueError("Invalid initialization mode")
 
     def get_remove_probability(self) -> List[int]:
         """ Get the propability of removal from the vertex cover for every node """
-        remove_probability=np.zeros(self.G.v)
-        for node in self.solution:
-            remove_probability[node-1]=2**(self.get_loss(node)/self.temperature)
+        remove_probability=np.zeros(self.quality)
+        for idx, node in enumerate(self.solution):
+            remove_probability[idx]=2**(-self.get_loss(node)/self.temperature)
 
         return remove_probability
 
     def get_add_probability(self) -> List[int]:
         """ Get the propability of adding into the vertex cover for every node """
-        add_probability=np.zeros(self.G.v)
-        for node in self.G.all_nodes:
-            if node in self.solution:
-                continue
-            add_probability[node-1]=2**(self.get_gain(node)/self.temperature)
+        add_probability=np.zeros(len(self.rem))
+        for idx,node in enumerate(self.rem):
+            gain=self.get_gain(node)
+            if gain==0:
+                add_probability[idx]=0
+            else:
+                add_probability[idx]=2**(-1/(self.temperature*gain))
 
         return add_probability
 
+    def get_add_probability(self,node):
+        gain=self.get_gain(node)
+        return 0 if gain==0 else 2**(-1/(self.temperature*gain))
+
     def get_loss(self,node):
         """ Get the loss of covered edges if a node is removed """
-        return set(self.G.get_neighbours(node)).difference(set(self.solution))
+        return len(set(self.G.get_neighbours(node)).difference(set(self.solution)))
 
 
     def get_gain(self,node):
         """ Get the gain of covered edges if a node is added """
-        return set(self.G.get_neighbours(node)).difference(set(self.solution))
+        return len(set(self.G.get_neighbours(node)).difference(set(self.solution)))
 
         # ===== Useful info: =====
         # > feel free to import the random module if needed, but do not worry about setting the seed as it is already set globally in exec.py
