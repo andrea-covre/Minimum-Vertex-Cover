@@ -50,28 +50,47 @@ class LS1:
         # Initialize a vertex cover
         self.init_cover()
         self.temperature = INITIAL_TEMPERATURE
+        self.edges_not_covered=set()
 
+        # remove redundant nodes
+        while True:
+            for node in self.solution:
+                if self.get_loss(node)==0:
+                    self.solution.remove(node)
+                    break
+            break
+                
+        
         while not timer.cutoff():
             
             if self.temperature < END_TEMPERATURE:
                 break
 
             # remove an vertex if the solution is already a vertex cover
-            if self.G.is_vertex_cover(self.solution):
+            if len(self.edges_not_covered)==0:
                 solution = self.solution
                 self.quality = self.G.get_solution_quality(solution)
                 self.trace.add_record(self.quality)
                 print(f"Current temperature: {self.temperature} | Current quality:{self.quality}") if DEBUG else None
-                remove_num=int(np.ceil((self.temperature*self.quality*0.5)))
-                choices=random.choices(self.solution,self.get_remove_probabilities(self.solution),k=1)
+                # remove_num=int(np.ceil((self.temperature*self.quality*0.05)))
+                choice=random.choices(self.solution,self.get_remove_probabilities(self.solution),k=1)[0]
                 self.temperature = self.temperature * COOLING_RATE
-                for choice in choices:
-                    self.solution.remove(choice)
+
+                for neighbor in set(self.G.get_neighbours(choice)).difference(set(self.solution)):
+                    self.edges_not_covered.add(frozenset([choice, neighbor]))
+
+                self.solution.remove(choice)
                 continue
 
             # add a vertex if the solution is not a vertex cover
-            nodes_to_add=self.G.get_nodes_to_add(self.solution)
-            choice=random.choices(nodes_to_add,self.get_remove_probabilities(nodes_to_add),k=1)[0]
+            nodes_to_add=set()
+            for node1, node2 in self.edges_not_covered:
+                nodes_to_add.add(node1)
+                nodes_to_add.add(node2)
+            nodes_to_add=list(nodes_to_add)
+            choice=random.choices(nodes_to_add,self.get_remove_probabilities(list(nodes_to_add)),k=1)[0]
+            for neighbor in set(self.G.get_neighbours(choice)).difference(set(self.solution)):
+                self.edges_not_covered.remove(frozenset([choice, neighbor]))
             self.solution.append(choice)    
             
         return self.quality, solution

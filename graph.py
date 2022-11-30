@@ -95,7 +95,7 @@ class Graph:
     def get_uncovered_edges(self, vertex_cover: List[int]) -> Set[frozenset]:
         """ Returns the edges not covered by the given vertex cover """
         return self.get_all_edges().difference(self.get_covered_edges(vertex_cover))
-    
+
     def get_nodes_to_add(self, vertex_cover: List[int]) -> List[int]:
         """ Returns possible nodes to add into the cover """
         nodes_to_add=set()
