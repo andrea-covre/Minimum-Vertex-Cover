@@ -10,11 +10,11 @@ from graph import Graph
 from utils import Timer, Trace
 
 # Parameters
-INITIALIZATION_MODE = "near_trivial"    # "lognorm" | "uniform" | "normal" | "near_trivial"
+INITIALIZATION_MODE = "near_trivial" # "lognorm" | "uniform" | "normal" | "near_trivial"
 POPULATION_SIZE = 500
-FITNESS_MODE = "minimizing_size_sub"           # "size_penalty" | "covered_edges_focused"
+FITNESS_MODE = "minimizing_size_sub" # "size_penalty" | "covered_edges_focused"
 SIZE_PENALTY_MULTIPLIER = 1.1
-CROSSOVER_MODE = "add_not_shared"              # "add_not_shared" | "remove_not_shared"
+CROSSOVER_MODE = "add_not_shared" # "add_not_shared" | "remove_not_shared"
 CROSSOVER_RATE = 0.5
 MUTATION_RATE = 0.5
 MUTATION_MODE = "decrease_size" # "batch" | "switch" | "decrease_size"
@@ -61,6 +61,7 @@ class LS2:
         self.mutating_nodes = int(self.G.v * MUTATION_RATE)
         
         # Initiating population and evaluating its fitness
+        print("\tInitiating population")
         population = self.init_population()
         population_fitness, total_fitness = self.get_population_fitness(population)
         
@@ -68,7 +69,7 @@ class LS2:
         print("init average size:", average_size) if DEBUG else None
         
         # Generation loop
-        geration = 0
+        generation = 0
         while not timer.cutoff():
             # Find mating probabilities
             mating_probabilities = self.get_mating_probability(population_fitness, total_fitness)
@@ -77,7 +78,7 @@ class LS2:
             # for individual, fitness, prob in zip(population, population_fitness, mating_probabilities):
             #     print("size", len(individual), "cov", self.G.count_covered_edges(individual), " | fitness", self.get_fitness(individual), " | prob", prob)
             
-            # if geration == 20:
+            # if generation == 20:
             #     for i in range(len(population)):
             #         print("size", len(population[i]), "fitness", population_fitness[i], "prob", mating_probabilities[i])
             #     exit()
@@ -96,9 +97,9 @@ class LS2:
             average_size = sum(sizes) / len(population)
             variance = sum([((x - average_size) ** 2) for x in sizes]) / len(sizes)
             std = round(variance ** 0.5, 3)
-            print(f"\tGen: {geration} | Avg. Fit: {round(total_fitness/POPULATION_SIZE, 3)} | Avg. Size: {average_size} | Std. Size: {std} | Best Sol Quality: {self.quality}")
+            print(f"\tGen: {generation:<4}  | Avg. Fit: {round(total_fitness/POPULATION_SIZE, 3):7.3f}\t | Avg. Size: {average_size:7.3f}\t | Std. Size: {std:5.3f}\t | Best Sol Quality: {self.quality}")
             
-            geration += 1
+            generation += 1
             
         # for i in range(len(population)):
         #     print(f"\t{i}: {population[i]} - {population_fitness[i]}")
