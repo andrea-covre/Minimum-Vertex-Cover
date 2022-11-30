@@ -20,6 +20,7 @@ from algos.LS2 import LS2
 
 
 OUTPUT_DIR = 'output'
+STATS_DIR = 'stats'
 ALGOS = {
     'BnB': BnB,
     'Approx': Approx,
@@ -87,7 +88,7 @@ def main():
     
     # Creating the timer and the trace
     timer = Timer(args.time)
-    trace = Trace(timer)
+    trace = Trace(timer, G)
     
     # Running the selected algorithm
     print(f"\n>> Running {args.alg} on {instance_name}...\n")
@@ -109,15 +110,14 @@ def main():
     print(f"{'Solution found:':<20} {solution}")
     print("")
     
-    # Creating output files
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
-    
+    # Creating output files    
     output_name = f"{instance_name}_{args.alg}_{args.time}"
     if algorithm.IS_DETERMINISTIC == False:
         output_name = f"{output_name}_{args.seed}"
     
-    trace.save(os.path.join(OUTPUT_DIR, f"{output_name}.trace"))
-    save_solution(os.path.join(OUTPUT_DIR, f"{output_name}.sol"), quality, solution)
+    trace.save(os.path.join(OUTPUT_DIR, f"{output_name}"))
+    trace.save_stats(os.path.join(STATS_DIR, f"{output_name}"))
+    save_solution(os.path.join(OUTPUT_DIR, f"{output_name}"), quality, solution)
     
     
 
