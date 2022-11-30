@@ -9,17 +9,23 @@ from typing import Tuple, List
 from graph import Graph
 from utils import Timer, Trace
 
-INITIALIZATION_MODE = "lognorm" # "lognorm" | "uniform"
-POPULATION_SIZE = 1000
-CROSSOVER_RATE = 0.5
-MUTATION_RATE = 0.06
-MUTATION_MODE = "switch" # "batch" | "switch"
+# Parameters
+INITIALIZATION_MODE = "near_trivial"    # "lognorm" | "uniform" | "normal" | "near_trivial"
+POPULATION_SIZE = 500
+FITNESS_MODE = "minimizing_size_sub"           # "size_penalty" | "covered_edges_focused"
 SIZE_PENALTY_MULTIPLIER = 1.1
+CROSSOVER_MODE = "add_not_shared"              # "add_not_shared" | "remove_not_shared"
+CROSSOVER_RATE = 0.5
+MUTATION_RATE = 0.5
+MUTATION_MODE = "decrease_size" # "batch" | "switch" | "decrease_size"
 
 class LOGNORMAL_PARAM:
     MU = 1
     SIGMA = 0.9
     DISTRIBUTION_RANGE = [0, 50]
+    
+class NEAR_TRIVIAL_PARAM:
+    LOWER_BOUNDARY = 0.95
 
 DEBUG = False
 
@@ -71,6 +77,10 @@ class LS2:
             # for individual, fitness, prob in zip(population, population_fitness, mating_probabilities):
             #     print("size", len(individual), "cov", self.G.count_covered_edges(individual), " | fitness", self.get_fitness(individual), " | prob", prob)
             
+            # if geration == 20:
+            #     for i in range(len(population)):
+            #         print("size", len(population[i]), "fitness", population_fitness[i], "prob", mating_probabilities[i])
+            #     exit()
             
             # Create next generation
             population = self.make_next_generation(population, mating_probabilities)
@@ -86,7 +96,7 @@ class LS2:
             average_size = sum(sizes) / len(population)
             variance = sum([((x - average_size) ** 2) for x in sizes]) / len(sizes)
             std = round(variance ** 0.5, 3)
-            print(f"\tGen: {geration} | Avg. Fit: {int(total_fitness/POPULATION_SIZE)} | Avg. Size: {average_size} | Std. Size: {std} | Best Sol Quality: {self.quality}")
+            print(f"\tGen: {geration} | Avg. Fit: {round(total_fitness/POPULATION_SIZE, 3)} | Avg. Size: {average_size} | Std. Size: {std} | Best Sol Quality: {self.quality}")
             
             geration += 1
             
@@ -110,6 +120,9 @@ class LS2:
             
         elif INITIALIZATION_MODE == "lognorm":
             get_number_of_nodes = self.get_lognormal_vertexes_count
+            
+        elif INITIALIZATION_MODE == "near_trivial":
+            get_number_of_nodes = lambda: random.randint(int(self.G.v-self.G.v*(1-NEAR_TRIVIAL_PARAM.LOWER_BOUNDARY)), self.G.v)
             
         else:
             raise ValueError("Invalid initialization mode")
@@ -153,15 +166,35 @@ class LS2:
         if len(individual) == 0: 
             return 0
         
-        covered_edges = self.G.count_covered_edges(individual) 
+        if FITNESS_MODE == "size_penalty":
+            covered_edges = self.G.count_covered_edges(individual) 
+            
+            denominator = self.G.e - covered_edges + len(individual) * SIZE_PENALTY_MULTIPLIER
+            if denominator == 0:
+                denominator = 0.001
+            
+            return (self.G.e / denominator) #/ len(individual)
         
-        denominator = self.G.e - covered_edges + len(individual) * SIZE_PENALTY_MULTIPLIER
-        if denominator == 0: denominator = 0.001
+        elif FITNESS_MODE == "covered_edges_focused":
+            return (covered_edges * 10 - len(individual))
         
-        return (self.G.e / denominator) #/ len(individual)
+        elif FITNESS_MODE == "minimizing_size_inverse":
+            """ Minimizing size with fitness ratio and weeding out not complete solutions """
+            covered_edges = self.G.count_covered_edges(individual) 
+            if not self.G.is_vertex_cover(individual):
+                return 0.001
+            return self.G.v/len(individual)
+        
+        elif FITNESS_MODE == "minimizing_size_sub":
+            """ Minimizing size with size difference and weeding out not complete solutions """
+            covered_edges = self.G.count_covered_edges(individual) 
+            if not self.G.is_vertex_cover(individual):
+                return 0.001
+            return self.G.v - len(individual)
+        
+        else:
+            raise ValueError("Invalid fitness mode")
 
-        return (covered_edges * 10 - len(individual))
-    
     
     def get_population_fitness(self, population: List[List[int]]) -> Tuple[List[int], float]:
         """ Evaluating fitness of the population """
@@ -211,14 +244,23 @@ class LS2:
     
     def crossover(self, parent1: List[int], parent2: List[int]) -> List[int]:
         """ Crossover between two parents to create a next generation's individual """
+        
         shared_nodes = set(parent1).intersection(set(parent2))
         not_shared_nodes = set(parent1).symmetric_difference(set(parent2))
         
-        for node in list(not_shared_nodes):
-            if random.random() < CROSSOVER_RATE:
-                shared_nodes.add(node)
-                
-        return list(shared_nodes)
+        if CROSSOVER_MODE == "add_not_shared":
+            
+            for node in list(not_shared_nodes):
+                if random.random() < CROSSOVER_RATE:
+                    shared_nodes.add(node)
+                    
+            return list(shared_nodes)
+        
+        elif CROSSOVER_MODE == "remove_not_shared":
+            return list(shared_nodes)
+        
+        else:
+            raise ValueError("Invalid crossover mode")
     
     
     def mutate(self, individual: List[int]) -> List[int]:
@@ -243,6 +285,12 @@ class LS2:
                 if len(inactive_nodes) == 0: break
                 inactive_node = random.choice(inactive_nodes)
                 individual.append(inactive_node)
+                
+        elif MUTATION_MODE == "decrease_size":
+            while random.random() < MUTATION_RATE:
+                if len(individual) <= 1: break
+                active_node = random.choice(individual)
+                individual.remove(active_node)
                     
         else:
             raise ValueError("Invalid mutation mode")
