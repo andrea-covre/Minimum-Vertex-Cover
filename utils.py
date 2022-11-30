@@ -75,6 +75,7 @@ class Trace:
         
         # Create the dictionary
         data = {
+                "sys_info": get_sys_info(),
                 "time": [record[0] for record in self.list],
                 "quality": [record[1] for record in self.list],
                 "graph_reads": [stat[0] for stat in self.graph_stats],
