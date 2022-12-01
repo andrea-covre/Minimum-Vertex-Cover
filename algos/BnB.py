@@ -52,11 +52,13 @@ class BnB:
         #0 and 1 indicates whether the node is in the vertex cover
         Frontier.append((v[0], 0, (-1, -1)))
         Frontier.append((v[0], 1, (-1, -1)))
+        Count = 0
         
         while timer.cutoff() == False and Frontier != []:
+            Count += 1
+            print(f"{Count}")
             (vi,state,parent)=Frontier.pop()
             backtrack = False
-            
             if state == 0:
                 neighbor = CurG.get_neighbours(vi)
                 for node in list(neighbor):
@@ -64,10 +66,10 @@ class BnB:
                     #CurG.remove_node(node)
                     CurG.v -= 1
                     CurG.e -= len(CurG.adj[node])
-                    for node1 in CurG.adj[node]:
-                        CurG.adj[node1].remove(node)
-                        if len(CurG.adj[node1]) == 0:
-                            del CurG.adj[node1]
+                    for Neigh in CurG.adj[node]:
+                        CurG.adj[Neigh].remove(node)
+                        if len(CurG.adj[Neigh]) == 0:
+                            del CurG.adj[Neigh]
                             CurG.v -= 1
                     del CurG.adj[node]
                     
@@ -118,8 +120,11 @@ class BnB:
                             #print(f"{CurG.adj}")
                             for edges in G.adj[mynode]:
                                 if edges not in VCnow:
-                                    CurG.adj[edges] = [mynode]
-                                    CurG.v += 1
+                                    if edges not in CurG.adj:
+                                        CurG.adj[edges] = [mynode]
+                                        CurG.v += 1
+                                    else:
+                                        CurG.adj[edges].append(mynode)
                                     CurG.adj[mynode].append(edges)
                             CurG.e += len(CurG.adj[mynode])
                     elif nextnode_parent == (-1, -1):
