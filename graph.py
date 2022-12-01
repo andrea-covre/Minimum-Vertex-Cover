@@ -36,16 +36,22 @@ class Graph:
         with open(path, 'r') as f:
             lines = f.readlines()
             
-            # Loading graph info (V, E)
-            self.v, self.e, _ = [int(x) for x in lines[0].split()]
-        
-            # Loading edges
-            current_node_idx = 1
-            for line in lines[1:]:
-                self.adj[current_node_idx] = [int(x) for x in line.split()]
-                current_node_idx += 1             
+        # Loading graph info (V, E)
+        self.v, self.e, _ = [int(x) for x in lines[0].split()]
+    
+        # Loading edges
+        current_node_idx = 1
+        for line in lines[1:]:
+            self.adj[current_node_idx] = [int(x) for x in line.split()]
+            
+            current_node_idx += 1
         
         self.all_nodes = self.adj.keys()
+
+        self.all_edges = set()
+        for node in self.all_nodes:
+            for neighbour in self.get_neighbours(node):
+                self.all_edges.add(frozenset([node, neighbour]))
                 
     def get_neighbours(self, node: int) -> List[int]:
         """
@@ -74,6 +80,10 @@ class Graph:
         for node in vertex_cover:
             for neighbour in self.get_neighbours(node):
                 covered_edges.add(frozenset([node, neighbour]))
+            
+        cnt = 0    
+        for node in vertex_cover:
+            cnt += len(self.get_neighbours(node))
 
         return covered_edges
 
@@ -81,16 +91,10 @@ class Graph:
         """
         Returns all edges in G
         
-        :param 
         :return: a set of frozensets, each frozenset represents an edge
         """
         
-        all_edges = set()
-        for node in self.all_nodes:
-            for neighbour in self.get_neighbours(node):
-                all_edges.add(frozenset([node, neighbour]))
-
-        return all_edges
+        return self.all_edges
 
     def get_uncovered_edges(self, vertex_cover: List[int]) -> Set[frozenset]:
         """ Returns the edges not covered by the given vertex cover """
