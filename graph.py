@@ -45,13 +45,12 @@ class Graph:
             self.adj[current_node_idx] = [int(x) for x in line.split()]
             
             current_node_idx += 1
-        self.all_nodes = self.adj.keys()
-        
+        self.all_nodes = list(self.adj.keys())
         
         # Precomputing all edges
         self.all_edges = set()
         self.node_edges = dict()
-        for node in self.adj.keys():
+        for node in self.all_nodes:
             self.node_edges[node] = set()
 
         for node in self.all_nodes:
