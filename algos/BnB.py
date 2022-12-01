@@ -93,6 +93,7 @@ class BnB:
                 if CurVC_size < UpperBound:
                     OptVC = CurVC.copy()
                     UpperBound = CurVC_size
+                    solution1 = []
                     #trace record
                     for i in range(len(OptVC))            :
                         if OptVC[i][1] == 1:
@@ -103,7 +104,11 @@ class BnB:
                         self.trace.add_record(quality1)
                 backtrack = True
             else:
-                CurLB = Lowerbound(CurG) + CurVC_size
+                LBa = Approx()
+                self.CurG = CurG
+                LBapprox,LBsol = LBa.get_vertex_cover(self.CurG,self.timer,self.trace)
+                CurLB = len(LBsol) + CurVC_size
+                #CurLB = Lowerbound(CurG) + CurVC_size
                 
                 if CurLB<UpperBound:
                     vj = find_maxdeg(CurG)
@@ -150,6 +155,7 @@ class BnB:
         if G.is_vertex_cover(solution):
 
             quality=G.get_solution_quality(solution)
+            self.trace.add_record(quality)
             print(f"Solution is found with quality of {quality}.")
 
         else:
