@@ -1,7 +1,6 @@
 """
 This file contains the logic for the Branch and Bound algorithm.
 """
-import numpy as np
 from algos.Approx import Approx
 from copy import deepcopy
 from typing import Tuple, List
@@ -38,16 +37,19 @@ class BnB:
         quality = None
         solution = []
         
+        #initializing parameters
         OptVC = []
         CurVC = []
         Frontier = []
         neighbor = []
         
-
+        #initial upper bound is the total # of vertices
         UpperBound = G.v
         CurG = deepcopy(G)
         v = find_maxdeg(CurG)
-         
+        
+        #The frontier set begins with the vertex with the highest degree
+        #0 and 1 indicates whether the node is in the vertex cover
         Frontier.append((v[0], 0, (-1, -1)))
         Frontier.append((v[0], 1, (-1, -1)))
         
@@ -79,13 +81,11 @@ class BnB:
                         del CurG.adj[node1]
                         CurG.v -= 1
                 del CurG.adj[vi]
-            else:
-                pass
             
             CurVC.append((vi,state))
             CurVC_size = VC_Size(CurVC)
             
-            if CurG.e == 0:
+            if CurG.e == 0: #vertex cover complete
                 if CurVC_size < UpperBound:
                     OptVC = CurVC.copy()
                     UpperBound = CurVC_size
@@ -113,9 +113,10 @@ class BnB:
                             CurG.adj[mynode] = []
                             for edges in G.adj[mynode]:
                                 if edges in CurG.adj:
-                                    CurG.adj[edges] = [CurG.adj[edges], mynode]
-                                    CurG.adj[mynode] = [CurG.adj[mynode],edges]
-                                    
+                                    CurG.adj[edges].append(mynode)
+                                else:
+                                    CurG.adj[edges] = [mynode]
+                                CurG.adj[mynode].append(edges)
                             CurG.e += len(CurG.adj[mynode])
                     elif nextnode_parent == (-1, -1):
                         CurVC.clear()
