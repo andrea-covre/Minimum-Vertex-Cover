@@ -80,10 +80,6 @@ class Graph:
         for node in vertex_cover:
             for neighbour in self.get_neighbours(node):
                 covered_edges.add(frozenset([node, neighbour]))
-            
-        cnt = 0    
-        for node in vertex_cover:
-            cnt += len(self.get_neighbours(node))
 
         return covered_edges
 
