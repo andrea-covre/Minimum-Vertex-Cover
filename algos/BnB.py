@@ -59,7 +59,6 @@ class BnB:
         
         while timer.cutoff() == False and Frontier != []:
             Count += 1
-            print(f"{Count}")
             (vi,state,parent)=Frontier.pop()
             backtrack = False
             if state == 0:
