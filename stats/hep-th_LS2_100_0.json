@@ -1,0 +1,38 @@
+{
+    "sys_info": {
+        "platform": "Darwin",
+        "platform-release": "22.1.0",
+        "platform-version": "Darwin Kernel Version 22.1.0: Sun Oct  9 20:14:54 PDT 2022; root:xnu-8792.41.9~2/RELEASE_X86_64",
+        "architecture": "x86_64",
+        "processor": "i386",
+        "ram": "8 GB"
+    },
+    "time": [
+        11.71,
+        59.57,
+        74.85,
+        82.15,
+        89.48
+    ],
+    "quality": [
+        8256,
+        8255,
+        8250,
+        8244,
+        8237
+    ],
+    "graph_reads": [
+        8361,
+        8361,
+        8361,
+        8361,
+        8361
+    ],
+    "vertex_cover_checks": [
+        2001,
+        14013,
+        18017,
+        20019,
+        22021
+    ]
+}
