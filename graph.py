@@ -39,19 +39,27 @@ class Graph:
         # Loading graph info (V, E)
         self.v, self.e, _ = [int(x) for x in lines[0].split()]
     
-        # Loading edges
+        # Loading neighbours
         current_node_idx = 1
         for line in lines[1:]:
             self.adj[current_node_idx] = [int(x) for x in line.split()]
             
             current_node_idx += 1
-        
         self.all_nodes = self.adj.keys()
-
+        
+        
+        # Precomputing all edges
         self.all_edges = set()
+        self.node_edges = dict()
+        for node in self.adj.keys():
+            self.node_edges[node] = set()
+
         for node in self.all_nodes:
             for neighbour in self.get_neighbours(node):
-                self.all_edges.add(frozenset([node, neighbour]))
+                edge = frozenset([node, neighbour])
+                self.node_edges[node].add(edge)
+                self.node_edges[neighbour].add(edge)
+                self.all_edges.add(edge)
                 
     def get_neighbours(self, node: int) -> List[int]:
         """
@@ -78,18 +86,12 @@ class Graph:
         
         covered_edges = set()
         for node in vertex_cover:
-            for neighbour in self.get_neighbours(node):
-                covered_edges.add(frozenset([node, neighbour]))
+            covered_edges.update(self.node_edges[node])
 
         return covered_edges
 
     def get_all_edges(self) -> Set[frozenset]:
-        """
-        Returns all edges in G
-        
-        :return: a set of frozensets, each frozenset represents an edge
-        """
-        
+        """ Returns all edges in G as a set of frozensets where each frozenset represents an edge """
         return self.all_edges
 
     def get_uncovered_edges(self, vertex_cover: List[int]) -> Set[frozenset]:
