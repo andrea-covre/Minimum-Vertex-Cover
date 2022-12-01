@@ -47,7 +47,8 @@ class BnB:
         neighbor = []
         
         #initial upper bound is the total # of vertices
-        UpperBound = G.v
+        appr=Approx()
+        UpperBound, solution_appr = appr.get_vertex_cover(self.G, self.timer, self.trace)
         CurG = deepcopy(G)
         v = find_maxdeg(CurG)
         
