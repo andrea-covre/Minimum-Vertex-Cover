@@ -35,7 +35,10 @@ class BnB:
         self.trace = trace
         
         quality = None
+        quality1 = None
         solution = []
+        solution1 = []
+        
         
         #initializing parameters
         OptVC = []
@@ -91,6 +94,14 @@ class BnB:
                 if CurVC_size < UpperBound:
                     OptVC = CurVC.copy()
                     UpperBound = CurVC_size
+                    #trace record
+                    for i in range(len(OptVC))            :
+                        if OptVC[i][1] == 1:
+                            solution1.append(OptVC[i][0])
+                    # check solution quality
+                    if G.is_vertex_cover(solution1):
+                        quality1=G.get_solution_quality(solution1)
+                        self.trace.add_record(quality1)
                 backtrack = True
             else:
                 CurLB = Lowerbound(CurG) + CurVC_size
