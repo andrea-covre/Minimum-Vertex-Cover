@@ -51,7 +51,7 @@ class BnB:
         Frontier.append((v[0], 0, (-1, -1)))
         Frontier.append((v[0], 1, (-1, -1)))
         
-        while not timer.cutoff() or Frontier == []:
+        while timer.cutoff() == False and Frontier != []:
             (vi,state,parent)=Frontier.pop()
             backtrack = False
             
@@ -108,21 +108,24 @@ class BnB:
                         id = CurVC.index(nextnode_parent) +1
                         while id < len(CurVC):
                             mynode,mystate = CurVC.pop()
-                            CurG.add_node(mynode)
-                            
-                            curVC_nodes = list(map(lambda t:t[0],CurVC))
-                            for nd in G.neighbors(mynode):
-                                if (nd in CurG.nodes()) and (nd not in curVC_nodes):
-                                    CurG.add_edge(nd,mynode)
+                            #CurG.add_node(mynode)
+                            CurG.v += 1
+                            CurG.adj[mynode] = []
+                            for edges in G.adj[mynode]:
+                                if edges in CurG.adj:
+                                    CurG.adj[edges] = [CurG.adj[edges], mynode]
+                                    CurG.adj[mynode] = [CurG.adj[mynode],edges]
+                                    
+                            CurG.e += len(CurG.adj[mynode])
                     elif nextnode_parent == (-1, -1):
                         CurVC.clear()
-                        CurG = G.copy()
+                        CurG = deepcopy(G)
                     else: 
                         print('error in backtracking step')
             
-            for i in range(len(OptVC))            :
-                if OptVC[i][1] == 1:
-                    solution.append(OptVC[i][0])
+        for i in range(len(OptVC))            :
+            if OptVC[i][1] == 1:
+                solution.append(OptVC[i][0])
         # check solution quality
         if G.is_vertex_cover(solution):
 
