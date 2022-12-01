@@ -6,6 +6,7 @@ from copy import deepcopy
 from typing import Tuple, List
 
 from graph import Graph
+from vertex_cover import Vertex_Cover
 from utils import Timer, Trace
 
 

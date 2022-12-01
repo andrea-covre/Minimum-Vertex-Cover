@@ -32,28 +32,40 @@ class Vertex_Cover(Graph):
         Graph.__init__(self, path)
         self.solution=set()
         self.quality=0
-        self.is_vertex_cover=False
         self.covered_edges=set()
         self.uncovered_edges=self.get_all_edges()
 
-    def is_vertex_cover(self):
-        return self.is_vertex_cover
+    def is_vertex_cover_new(self):
+        """Use this only if you used add_vertex() and remove_vertex() to manipulate the solution, 
+        or else you may want to call fix_uncovered_edges() first"""
+        return len(self.uncovered_edges)==0
+
+    def set_solution(self,solution: List[int]):
+        """The solution is initially set to be empty. Please set the initial solution if you have one."""
+        self.solution=set(solution)
+
+    def get_solution(self):
+        return list(self.solution)
     
-    def get_solution_quality(self):
+    def get_solution_quality_new(self):
         return self.quality
 
-    def get_covered_edges(self):
+    def get_covered_edges_new(self):
+        """I'm keeping this at this time, but I think checking the uncovered edges makes more sense.
+        Let Zhaonan know if you have any thoughts on this."""
         return self.covered_edges
 
-    def get_uncovered_edges(self):
+    def get_uncovered_edges_new(self):
+        """Use this only if you used add_vertex() and remove_vertex() to manipulate the solution, 
+        or else you may want to call fix_uncovered_edges() first"""
         return self.uncovered_edges
 
     def update_solution(self):
         self.quality=len(self.solution)
-        self.is_vertex_cover=(len(self.uncovered_edges)==0)
 
     def add_vertex(self,node):
-        changes=set(self.get_neighbours(node)).difference(set(self.solution))
+        """Just add the node. This function handles the rest."""
+        changes=self.get_changes(node)
         self.covered_edges.update(changes)
         self.uncovered_edges.difference_update(changes)
         self.solution.add(node)
@@ -64,11 +76,35 @@ class Vertex_Cover(Graph):
             self.add_vertex(node)
     
     def remove_vertex(self,node):
-        changes=set(self.get_neighbours(node)).difference(set(self.solution))
+        """Just remove the node. This function handles the rest."""
+        changes=self.get_changes(node)
         self.covered_edges.difference_update(changes)
         self.uncovered_edges.update(changes)
         self.solution.remove(node)
         self.update_solution()
+
+    def get_add_candidates(self) -> List[int]:
+        """Returns the (reasonable) candidates of vertices to be added into the solution."""
+        add_candidates=set()
+        for node1, node2 in iter(self.get_uncovered_edges_new()):
+            add_candidates.add(node1)
+            add_candidates.add(node2)
+        return list(add_candidates)
+
+    def get_changes(self,node):
+        """Returns the changed edges (either from covered to uncovered, or the other way) if a node is added/removed."""
+        changes=set()
+        for neighbor in iter(set(self.get_neighbours(node)).difference(set(self.solution))):
+            changes.add(frozenset([node,neighbor]))
+        return changes
+
+    def get_loss(self,node):
+        """Returns the number of loss in covered edges if a node is removed."""
+        return len(set(self.get_neighbours(node)).difference(set(self.solution)))
+
+    def get_gain(self,node):
+        """Returns the number of gain in covered edges if a node is added."""
+        return len(set(self.get_neighbours(node)).difference(set(self.solution)))
 
     def remove_vertices(self,nodes:List[int]):
         for node in nodes:
@@ -79,9 +115,13 @@ class Vertex_Cover(Graph):
         self.remove_vertices(nodes_remove)
 
     def fix_covered_edges(self):
-        self.covered_edges=self.get_covered_edges()
+        self.covered_edges=self.get_covered_edges(self.solution)
         self.update_solution()
 
     def fix_uncovered_edges(self):
-        self.uncovered_edges=self.get_uncovered_edges()
+        self.uncovered_edges=self.get_uncovered_edges(self.solution)
         self.update_solution()
+
+    def fix_all(self):
+        self.fix_covered_edges()
+        self.fix_uncovered_edges()

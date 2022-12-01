@@ -12,6 +12,7 @@ import argparse
 import numpy as np
 
 from graph import Graph
+from vertex_cover import Vertex_Cover
 from utils import Timer, Trace, save_solution, get_sys_info
 from algos.BnB import BnB
 from algos.Approx import Approx
@@ -74,7 +75,7 @@ def main():
     np.random.seed(args.seed)
     
     # Loading the graph
-    G = Graph(args.inst)
+    G = Vertex_Cover(args.inst)
     
     # Getting the algorithm to run
     algorithm = ALGOS[args.alg]()
