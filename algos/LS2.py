@@ -8,6 +8,7 @@ from typing import Tuple, List
 
 from graph import Graph
 from utils import Timer, Trace
+from algos.Approx import Approx
 
 # TODO: try adjusting parameters based on the graph size
 # TODO: clean unused/commented parts
@@ -15,13 +16,13 @@ from utils import Timer, Trace
 # TODO: print paramenters used [???]
 
 # Parameters
-INITIALIZATION_MODE = "near_trivial" # "lognorm" | "uniform" | "normal" | "near_trivial"
+INITIALIZATION_MODE = "approx"#"near_trivial" # "lognorm" | "uniform" | "normal" | "near_trivial" | "approx"
 POPULATION_SIZE = 500
 FITNESS_MODE = "minimizing_size_sub" # "size_penalty" | "covered_edges_focused"
 SIZE_PENALTY_MULTIPLIER = 1.1
-CROSSOVER_MODE = "add_not_shared" # "add_not_shared" | "remove_not_shared"
+CROSSOVER_MODE = "remove_not_shared" # "add_not_shared" | "remove_not_shared"
 CROSSOVER_RATE = 0.5
-MUTATION_RATE = 0.5
+MUTATION_RATE = 0.8
 MUTATION_MODE = "decrease_size" # "batch" | "switch" | "decrease_size"
 
 class LOGNORMAL_PARAM:
@@ -129,6 +130,17 @@ class LS2:
             
         elif INITIALIZATION_MODE == "near_trivial":
             get_number_of_nodes = lambda: random.randint(int(self.G.v-self.G.v*(1-NEAR_TRIVIAL_PARAM.LOWER_BOUNDARY)), self.G.v)
+            
+        elif INITIALIZATION_MODE == "approx":
+            
+            appr = Approx()
+            t_timer = Timer(self.timer.time_limit)
+            t_trace = Trace(t_timer, self.G)
+            t_timer.start()
+            
+            vertex_cover = appr.get_vertex_cover(self.G, t_timer, t_trace)[1]
+            
+            return [vertex_cover for i in range(POPULATION_SIZE)]
             
         else:
             raise ValueError("Invalid initialization mode")
