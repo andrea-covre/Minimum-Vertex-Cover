@@ -111,12 +111,16 @@ class BnB:
                             #CurG.add_node(mynode)
                             CurG.v += 1
                             CurG.adj[mynode] = []
+                            VCnow = []
+                            for i in range(len(CurVC))            :
+                                if CurVC[i][1] == 1:
+                                    VCnow.append(CurVC[i][0])
+                            #print(f"{CurG.adj}")
                             for edges in G.adj[mynode]:
-                                if edges in CurG.adj:
-                                    CurG.adj[edges].append(mynode)
-                                else:
+                                if edges not in VCnow:
                                     CurG.adj[edges] = [mynode]
-                                CurG.adj[mynode].append(edges)
+                                    CurG.v += 1
+                                    CurG.adj[mynode].append(edges)
                             CurG.e += len(CurG.adj[mynode])
                     elif nextnode_parent == (-1, -1):
                         CurVC.clear()
@@ -145,7 +149,7 @@ def find_maxdeg(G):
        if len(G.adj[node]) > node_max[1]:
            node_max[0] = node
            node_max[1] = len(G.adj[node])
-       return node_max
+    return node_max
     
     #ESTIMATE LOWERBOUND
 def Lowerbound(G):
