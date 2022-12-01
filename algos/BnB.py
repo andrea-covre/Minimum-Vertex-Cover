@@ -123,18 +123,17 @@ class BnB:
             for i in range(len(OptVC))            :
                 if OptVC[i][1] == 1:
                     solution.append(OptVC[i][0])
-            # check solution quality
-            if G.is_vertex_cover(solution):
+        # check solution quality
+        if G.is_vertex_cover(solution):
 
-                quality=G.get_solution_quality(solution)
-                print(f"Solution is found with quality of {quality}.")
+            quality=G.get_solution_quality(solution)
+            print(f"Solution is found with quality of {quality}.")
 
-            else:
-
-                edges_covered=G.count_covered_edges(solution)
-                total_edges=G.e
-                print(f"Solution is not found in time with {edges_covered} edges covered in total {total_edges} edges.")
-            return quality, solution
+        else:
+            edges_covered=G.count_covered_edges(solution)
+            total_edges=G.e
+            print(f"Solution is not found in time with {edges_covered} edges covered in total {total_edges} edges.")
+        return quality, solution
         
 def find_maxdeg(G):
     node_max = [-1, -1]
