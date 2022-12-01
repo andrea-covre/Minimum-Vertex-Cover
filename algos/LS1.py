@@ -13,10 +13,10 @@ from algos.Approx import Approx
 
 INITIALIZATION_MODE = "Approx"  # "Approx" | "full"
 INITIAL_TEMPERATURE = 1
-COOLING_RATE = 0.98
-END_TEMPERATURE = 0.0001
+COOLING_RATE = 0.999
+END_TEMPERATURE = 0.01
 
-DEBUG=True
+DEBUG=False
 
 class LS1:
     IS_DETERMINISTIC = False
@@ -44,21 +44,19 @@ class LS1:
         self.timer = timer
         self.trace = trace
 
-        solution = None  # solution as a candidate
+        solution = None  # all-time best solution
+        solution_temp = None # solution as a candidate
+        quality = None
+        quality_temp = None
 
         # Initialize a vertex cover
         self.init_cover()
         self.temperature = INITIAL_TEMPERATURE
-
-        # remove redundant nodes
-        while True:
-            for node in self.G.get_solution():
-                if len(self.G.get_changes(node))==0:
-                    self.G.remove_vertex(node)
-                    break
-            break
                 
-        
+        solution = self.G.get_solution()
+        quality_temp = self.G.get_solution_quality_new()
+        quality = quality_temp
+
         while not timer.cutoff():
             
             if self.temperature < END_TEMPERATURE:
@@ -66,12 +64,15 @@ class LS1:
 
             # remove an vertex if the solution is already a vertex cover
             if len(self.G.get_uncovered_edges_new())==0:
-                solution = self.G.get_solution()
-                self.quality = self.G.get_solution_quality_new()
-                self.trace.add_record(self.quality) 
-                print(f"Current temperature: {self.temperature} | Current quality:{self.quality}") if DEBUG else None
+                solution_temp = self.G.get_solution()
+                quality_temp = self.G.get_solution_quality_new()
+                if quality_temp < quality:
+                    quality = quality_temp
+                    self.trace.add_record(quality)
+                    print(f"Current temperature: {self.temperature} | Current quality:{quality_temp}") 
+                print(f"Current temperature: {self.temperature} | Current quality:{quality_temp}") if DEBUG else None
                 # remove_num=int(np.ceil((self.temperature*self.quality*0.05)))
-                choice=random.choices(solution,self.get_remove_probabilities(solution),k=1)[0]
+                choice=random.choices(solution_temp,self.get_remove_probabilities(solution_temp),k=1)[0]
                 self.temperature = self.temperature * COOLING_RATE
                 self.G.remove_vertex(choice)
                 continue
@@ -82,7 +83,7 @@ class LS1:
             self.G.add_vertex(choice)  
             print(f"Current temperature: {self.temperature} | Current quality:{self.G.get_solution_quality_new()}") if DEBUG else None
             
-        return self.quality, solution
+        return quality, solution
 
     def init_cover(self) -> Tuple[int, List[int]]:
         """ Initiating a vertex cover"""
@@ -95,15 +96,24 @@ class LS1:
             self.G.fix_uncovered_edges()
 
         elif INITIALIZATION_MODE == "full":
-            self.quality = self.G.v
-            self.solution = list(self.G.all_nodes)
+            self.G.set_solution(list(self.G.all_nodes))
+            self.G.fix_covered_edges()
+            self.G.fix_uncovered_edges()
 
         else:
             raise ValueError("Invalid initialization mode")
 
+        # remove redundant nodes
+        while True:
+            for node in self.G.get_solution():
+                if len(self.G.get_changes(node))==0:
+                    self.G.remove_vertex(node)
+                    continue
+            break
+
     def get_add_probability(self,node):
         gain=self.G.get_gain(node)
-        return 0 if gain==0 else 2**(-1/(self.temperature*gain))
+        return 0 if gain==0 else 2**(gain/(self.temperature))
 
     def get_remove_probability(self,node):
         loss=self.G.get_loss(node)
