@@ -2,6 +2,7 @@
 This file contains the common functions used in vertex cover algorithms.
 """
 
+import networkx as nx
 from typing import List, Set
 from graph import Graph
 
@@ -94,17 +95,17 @@ class Vertex_Cover(Graph):
     def get_changes(self,node):
         """Returns the changed edges (either from covered to uncovered, or the other way) if a node is added/removed."""
         changes=set()
-        for neighbor in iter(set(self.get_neighbours(node)).difference(set(self.solution))):
+        for neighbor in iter(set(self.get_neighbours(node)).difference(self.solution)):
             changes.add(frozenset([node,neighbor]))
         return changes
 
     def get_loss(self,node):
         """Returns the number of loss in covered edges if a node is removed."""
-        return len(set(self.get_neighbours(node)).difference(set(self.solution)))
+        return len(set(self.get_neighbours(node)).difference(self.solution))
 
     def get_gain(self,node):
         """Returns the number of gain in covered edges if a node is added."""
-        return len(set(self.get_neighbours(node)).difference(set(self.solution)))
+        return len(set(self.get_neighbours(node)).difference(self.solution))
 
     def remove_vertices(self,nodes:List[int]):
         for node in nodes:
@@ -125,3 +126,27 @@ class Vertex_Cover(Graph):
     def fix_all(self):
         self.fix_covered_edges()
         self.fix_uncovered_edges()
+
+    def get_lower_bound(self):
+        """Returns a lower bound for the current partial solution using maximal matching (make sure to install nx)"""
+        G=nx.Graph()
+        G.add_edges_from(self.get_uncovered_edges_new())
+        return len(nx.maximal_matching(G))+self.get_solution_quality_new()
+
+    def get_upper_bound(self):
+        """Returns an upper bound for the current partial solution using greedy"""
+        added_nodes=[]
+        while not self.is_vertex_cover_new():
+            gain=0
+            for node in self.get_add_candidates():
+                new_gain=self.get_gain(node)
+                if new_gain>gain:
+                    node_to_add=node
+                    gain=new_gain
+            self.add_vertex(node_to_add)
+            added_nodes.append(node_to_add)
+        self.remove_vertices(added_nodes)
+        return len(added_nodes)+self.get_solution_quality_new()
+
+
+        

@@ -48,6 +48,7 @@ class LS1:
         solution_temp = None # solution as a candidate
         quality = None
         quality_temp = None
+        # print(f"ub:{self.G.get_upper_bound()}|lb:{self.G.get_lower_bound()}")
 
         # Initialize a vertex cover
         self.init_cover()
@@ -75,7 +76,7 @@ class LS1:
                 choice=random.choices(solution_temp,self.get_remove_probabilities(solution_temp),k=1)[0]
                 self.temperature = self.temperature * COOLING_RATE
                 self.G.remove_vertex(choice)
-                # print(self.G.get_lower_bound())
+                print(f"ub:{self.G.get_upper_bound()}|lb:{self.G.get_lower_bound()}")
                 continue
 
             # add a vertex if the solution is not a vertex cover
