@@ -106,11 +106,14 @@ class BnB:
                         self.trace.add_record(quality1)
                 backtrack = True
             else:
-                # LBa = Approx()
+                # UBq,UBsol=appr.get_vertex_cover(CurG,self.timer,self.trace)
+                # if UBq<UpperBound:
+                    # UpperBound=UBq
                 # self.CurG = CurG
                 # LBapprox,LBsol = LBa.get_vertex_cover(self.CurG,self.timer,self.trace)
                 # CurLB = len(LBsol) + CurVC_size
                 CurLB = Lowerbound(CurG) + CurVC_size
+                print(f"LB:{CurLB}|UB:{UpperBound}")
                 
                 if CurLB<UpperBound:
                     vj = find_maxdeg(CurG)
@@ -177,7 +180,7 @@ def find_maxdeg(G):
     #ESTIMATE LOWERBOUND
 def Lowerbound(G):
     G_nx=nx.Graph()
-    G_nx.add_edges_from(G.get_all_edges())
+    G_nx.add_nodes_from(G.adj)
     return len(nx.maximal_matching(G_nx))
 
 def ceil(d):
