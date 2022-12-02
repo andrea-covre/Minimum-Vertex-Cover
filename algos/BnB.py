@@ -3,6 +3,7 @@ This file contains the logic for the Branch and Bound algorithm.
 """
 from algos.Approx import Approx
 from copy import deepcopy
+import networkx as nx
 from typing import Tuple, List
 
 from graph import Graph
@@ -48,7 +49,7 @@ class BnB:
         
         appr=Approx()
         UpperBound, solution_appr = appr.get_vertex_cover(self.G, self.timer, self.trace)
-	UpperBound += 1
+        UpperBound += 1
         CurG = deepcopy(G)
         v = find_maxdeg(CurG)
         
@@ -175,9 +176,9 @@ def find_maxdeg(G):
     
     #ESTIMATE LOWERBOUND
 def Lowerbound(G):
-    LB= G.e / find_maxdeg(G)[1]
-    LB= ceil(LB)
-    return LB
+    G_nx=nx.Graph()
+    G_nx.add_edges_from(G.get_all_edges())
+    return len(nx.maximal_matching(G_nx))
 
 def ceil(d):
     if d > int(d):
