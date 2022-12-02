@@ -35,6 +35,7 @@ class BnB:
         self.timer = timer
         self.trace = trace
         
+        #initialize final output and trace intermediates
         quality = None
         quality1 = None
         solution = []
@@ -47,9 +48,11 @@ class BnB:
         Frontier = []
         neighbor = []
         
+        #initialize UB with Approx algo(max degree)
         appr=Approx()
         UpperBound, solution_appr = appr.get_vertex_cover(self.G, self.timer, self.trace)
         UpperBound += 1
+        #initialize new graph to be divided in subproblems
         CurG = deepcopy(G)
         v = find_maxdeg(CurG)
         
@@ -57,17 +60,17 @@ class BnB:
         #0 and 1 indicates whether the node is in the vertex cover
         Frontier.append((v[0], 0, (-1, -1)))
         Frontier.append((v[0], 1, (-1, -1)))
-        Count = 0
         
         while timer.cutoff() == False and Frontier != []:
-            Count += 1
+            #Produce node for exploration
             (vi,state,parent)=Frontier.pop()
             backtrack = False
-            if state == 0:
+            if state == 0: #not included in VC
                 neighbor = CurG.get_neighbours(vi)
                 for node in list(neighbor):
-                    CurVC.append((node, 1))
-                    #CurG.remove_node(node)
+                    CurVC.append((node, 1)) 
+                    #all neighboring nodes must be included in VC
+                    #Nodes included in VC are removed from the current graph
                     CurG.v -= 1
                     CurG.e -= len(CurG.adj[node])
                     for Neigh in CurG.adj[node]:
@@ -92,73 +95,73 @@ class BnB:
             CurVC_size = VC_Size(CurVC)
             
             if CurG.e == 0: #vertex cover complete
-                if CurVC_size < UpperBound:
+                if CurVC_size < UpperBound:#accepts result
                     OptVC = CurVC.copy()
-                    UpperBound = CurVC_size
+                    UpperBound = CurVC_size  #update UB
                     solution1 = []
                     #trace record
                     for i in range(len(OptVC))            :
                         if OptVC[i][1] == 1:
                             solution1.append(OptVC[i][0])
-                    # check solution quality
+                    # check solution quality and record trace
                     if G.is_vertex_cover(solution1):
                         quality1=G.get_solution_quality(solution1)
                         self.trace.add_record(quality1)
                 backtrack = True
             else:
+                # set lower bound by dividing number of edges with max degree node in the partial graph
+                CurLB = Lowerbound(CurG) + CurVC_size
+                
                 # UBq,UBsol=appr.get_vertex_cover(CurG,self.timer,self.trace)
                 # if UBq<UpperBound:
                     # UpperBound=UBq
                 # self.CurG = CurG
-                # LBapprox,LBsol = LBa.get_vertex_cover(self.CurG,self.timer,self.trace)
-                # CurLB = len(LBsol) + CurVC_size
-                CurLB = Lowerbound(CurG) + CurVC_size
-                print(f"LB:{CurLB}|UB:{UpperBound}")
                 
-                if CurLB<UpperBound:
+                #print(f"LB:{CurLB}|UB:{UpperBound}")
+                
+                if CurLB<UpperBound: #continue explore
                     vj = find_maxdeg(CurG)
                     Frontier.append((vj[0],0,(vi,state)))
                     Frontier.append((vj[0],1,(vi,state)))
-                else:
+                else: #end this path and backtrack
                     backtrack = True
             
             if backtrack == True:
-                if Frontier != []:
+                if Frontier != []: #revert to parent node
                     nextnode_parent = Frontier[-1][2]
                     
                     if nextnode_parent in CurVC:
                         id = CurVC.index(nextnode_parent) +1
-                        while id < len(CurVC):
-                            mynode,mystate = CurVC.pop()
-                            #CurG.add_node(mynode)
+                        while id < len(CurVC): #
+                            Renode,Restate = CurVC.pop()
                             CurG.v += 1
-                            CurG.adj[mynode] = []
+                            CurG.adj[Renode] = []
                             VCnow = []
                             for i in range(len(CurVC))            :
                                 if CurVC[i][1] == 1:
                                     VCnow.append(CurVC[i][0])
                             #print(f"{CurG.adj}")
-                            for edges in G.adj[mynode]:
+                            for edges in G.adj[Renode]:
                                 if edges not in VCnow:
                                     if edges not in CurG.adj:
-                                        CurG.adj[edges] = [mynode]
+                                        CurG.adj[edges] = [Renode]
                                         CurG.v += 1
                                     else:
-                                        CurG.adj[edges].append(mynode)
-                                    CurG.adj[mynode].append(edges)
-                            CurG.e += len(CurG.adj[mynode])
+                                        CurG.adj[edges].append(Renode)
+                                    CurG.adj[Renode].append(edges)
+                            CurG.e += len(CurG.adj[Renode])
                     elif nextnode_parent == (-1, -1):
                         CurVC.clear()
                         CurG = deepcopy(G)
                     else: 
                         print('error in backtracking step')
-            
+                        
+        #output final quality and solution    
         for i in range(len(OptVC))            :
             if OptVC[i][1] == 1:
                 solution.append(OptVC[i][0])
         # check solution quality
         if G.is_vertex_cover(solution):
-
             quality=G.get_solution_quality(solution)
             self.trace.add_record(quality)
             print(f"Solution is found with quality of {quality}.")
@@ -177,21 +180,24 @@ def find_maxdeg(G):
            node_max[1] = len(G.adj[node])
     return node_max
     
-    #ESTIMATE LOWERBOUND
+    #Calculate lowerbound of partial graph with max degree node
 def Lowerbound(G):
-    G_nx=nx.Graph()
-    G_nx.add_nodes_from(G.adj)
-    return len(nx.maximal_matching(G_nx))
+    LB= G.e / find_maxdeg(G)[1]
+    LB= ceil(LB)
+    return LB
+    #G_nx=nx.Graph()
+    #G_nx.add_nodes_from(G.adj)
+    #return len(nx.maximal_matching(G_nx))
 
+#round LB
 def ceil(d):
     if d > int(d):
         return int(d) + 1
     else:
         return int(d)
-    
-def VC_Size(VC):
-	# VC is a tuple list, where each tuple = (node_ID, state, (node_ID, state)) vc_size is the number of nodes which has state == 1
 
+#Count size of VC for LB    
+def VC_Size(VC):
 	vc_size = 0
 	for element in VC:
 		vc_size = vc_size + element[1]
