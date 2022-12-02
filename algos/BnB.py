@@ -45,10 +45,14 @@ class BnB:
         CurVC = []
         Frontier = []
         neighbor = []
-        
-        #initial upper bound is the total # of vertices
         appr=Approx()
+        #initial upper bound is the total # of vertices
+        #UpperBound = G.v
+        
+        
         UpperBound, solution_appr = appr.get_vertex_cover(self.G, self.timer, self.trace)
+        UpperBound += 1
+        
         CurG = deepcopy(G)
         v = find_maxdeg(CurG)
         
@@ -56,10 +60,8 @@ class BnB:
         #0 and 1 indicates whether the node is in the vertex cover
         Frontier.append((v[0], 0, (-1, -1)))
         Frontier.append((v[0], 1, (-1, -1)))
-        Count = 0
         
         while timer.cutoff() == False and Frontier != []:
-            Count += 1
             (vi,state,parent)=Frontier.pop()
             backtrack = False
             if state == 0:
@@ -105,13 +107,12 @@ class BnB:
                         self.trace.add_record(quality1)
                 backtrack = True
             else:
-                LBa = Approx()
                 self.CurG = CurG
-                LBapprox,LBsol = LBa.get_vertex_cover(self.CurG,self.timer,self.trace)
-                CurLB = len(LBsol) + CurVC_size
-                #CurLB = Lowerbound(CurG) + CurVC_size
+                #LBapprox,LBsol = appr.get_vertex_cover(self.CurG,self.timer,self.trace)
+                #CurLB = len(LBsol) + CurVC_size
+                CurLB = Lowerbound(CurG) + CurVC_size
                 
-                if CurLB<UpperBound:
+                if CurLB < UpperBound:
                     vj = find_maxdeg(CurG)
                     Frontier.append((vj[0],0,(vi,state)))
                     Frontier.append((vj[0],1,(vi,state)))
