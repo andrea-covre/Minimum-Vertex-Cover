@@ -5,6 +5,7 @@ This file contains the logic for the First Local Search algorithm.
 import random
 import numpy as np
 from typing import Tuple, List
+import os
 
 from graph import Graph
 from vertex_cover import Vertex_Cover
@@ -13,10 +14,10 @@ from algos.Approx import Approx
 
 INITIALIZATION_MODE = "Approx"  # "Approx" | "full"
 INITIAL_TEMPERATURE = 1
-COOLING_RATE = 0.999
+COOLING_RATE = 0.995
 END_TEMPERATURE = 0.01
 
-DEBUG=True
+DEBUG=False
 
 class LS1:
     IS_DETERMINISTIC = False
@@ -65,18 +66,19 @@ class LS1:
 
             # remove an vertex if the solution is already a vertex cover
             if len(self.G.get_uncovered_edges_new())==0:
+                self.visualize_solution()
                 solution_temp = self.G.get_solution()
                 quality_temp = self.G.get_solution_quality_new()
                 if quality_temp < quality:
                     quality = quality_temp
                     self.trace.add_record(quality)
-                    print(f"Current temperature: {self.temperature} | Current quality:{quality_temp}") 
+                    # print(f"Current temperature: {self.temperature} | Current quality:{quality_temp}") 
                 print(f"Current temperature: {self.temperature} | Current quality:{quality_temp}") if DEBUG else None
                 # remove_num=int(np.ceil((self.temperature*self.quality*0.05)))
                 choice=random.choices(solution_temp,self.get_remove_probabilities(solution_temp),k=1)[0]
                 self.temperature = self.temperature * COOLING_RATE
                 self.G.remove_vertex(choice)
-                print(f"ub:{self.G.get_upper_bound()}|lb:{self.G.get_lower_bound()}")
+                # print(f"ub:{self.G.get_upper_bound()}|lb:{self.G.get_lower_bound()}")
                 continue
 
             # add a vertex if the solution is not a vertex cover
@@ -132,6 +134,20 @@ class LS1:
         for node in nodes:
             probability.append(self.get_remove_probability(node))
         return probability
+
+    def visualize_solution(self):
+        _ = os.system('cls')
+        output=""
+        for node in range(1,self.G.v+1):
+            if node in self.G.solution:
+                output+="*"
+            else: 
+                output+=" "
+        print(output)
+
+        
+
+
 
         # ===== Useful info: =====
         # > feel free to import the random module if needed, but do not worry about setting the seed as it is already set globally in exec.py

@@ -68,7 +68,8 @@ class BnB:
             if state == 0: #not included in VC
                 neighbor = CurG.get_neighbours(vi)
                 for node in list(neighbor):
-                    CurVC.append((node, 1)) 
+                    CurVC.append((node, 1))
+                    print(chr(33+(node%93)),end="") 
                     #all neighboring nodes must be included in VC
                     #Nodes included in VC are removed from the current graph
                     CurG.v -= 1
@@ -92,6 +93,7 @@ class BnB:
                 del CurG.adj[vi]
             
             CurVC.append((vi,state))
+            print(chr(33+(vi%93)),end="") 
             CurVC_size = VC_Size(CurVC)
             
             if CurG.e == 0: #vertex cover complete
@@ -134,6 +136,7 @@ class BnB:
                         id = CurVC.index(nextnode_parent) +1
                         while id < len(CurVC): #
                             Renode,Restate = CurVC.pop()
+                            print("\b",end="")
                             CurG.v += 1
                             CurG.adj[Renode] = []
                             VCnow = []
@@ -179,15 +182,23 @@ def find_maxdeg(G):
            node_max[0] = node
            node_max[1] = len(G.adj[node])
     return node_max
+
+def find_mindeg(G):
+    node_max = [G.v, G.v]
+    for node in G.adj.keys():
+       if len(G.adj[node]) < node_max[1]:
+           node_max[0] = node
+           node_max[1] = len(G.adj[node])
+    return node_max
     
     #Calculate lowerbound of partial graph with max degree node
 def Lowerbound(G):
     LB= G.e / find_maxdeg(G)[1]
     LB= ceil(LB)
     return LB
-    #G_nx=nx.Graph()
-    #G_nx.add_nodes_from(G.adj)
-    #return len(nx.maximal_matching(G_nx))
+    # G_nx=nx.Graph()
+    # G_nx.add_nodes_from(G.adj)
+    # return len(nx.maximal_matching(G_nx))
 
 #round LB
 def ceil(d):
