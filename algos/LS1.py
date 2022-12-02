@@ -12,9 +12,25 @@ from utils import Timer, Trace
 from algos.Approx import Approx
 
 INITIALIZATION_MODE = "Approx"  # "Approx" | "full"
-INITIAL_TEMPERATURE = 1
-COOLING_RATE = 0.999
-END_TEMPERATURE = 0.01
+ANNEALING_MODE = "profile" # "profile" | "exponential"
+
+# exponential cooling setting
+INITIAL_TEMPERATURE = 0.1
+COOLING_RATE = 0.9995
+END_TEMPERATURE = 0.001
+
+# annealing profile
+HEATING_TEMP=0.1
+ANNEALING_1_TEMP=0.05
+ANNEALING_2_TEMP=0.01
+COOLING_TEMP=0.001
+# end time (percentage of the time limit)
+HEATING_TIME=0.1
+ANNEALING_1_TIME=0.4
+ANNEALING_2_TIME=0.7
+COOLING_TIME=1
+
+ANNEALING_PROFILE={HEATING_TIME:HEATING_TEMP, ANNEALING_1_TIME:ANNEALING_1_TEMP, ANNEALING_2_TIME:ANNEALING_2_TEMP, COOLING_TIME:COOLING_TEMP }
 
 DEBUG=True
 
@@ -60,8 +76,11 @@ class LS1:
 
         while not timer.cutoff():
             
-            if self.temperature < END_TEMPERATURE:
-                break
+            if ANNEALING_MODE == "exponential":
+                if self.temperature < END_TEMPERATURE:
+                    break
+            elif ANNEALING_MODE == "profile":
+                self.temperature=self.get_temperature(ANNEALING_PROFILE, timer.elapsed()/timer.time_limit)
 
             # remove an vertex if the solution is already a vertex cover
             if len(self.G.get_uncovered_edges_new())==0:
@@ -69,22 +88,36 @@ class LS1:
                 quality_temp = self.G.get_solution_quality_new()
                 if quality_temp < quality:
                     quality = quality_temp
+                    solution = solution_temp
                     self.trace.add_record(quality)
-                    print(f"Current temperature: {self.temperature} | Current quality:{quality_temp}") 
-                print(f"Current temperature: {self.temperature} | Current quality:{quality_temp}") if DEBUG else None
+                    print(f"Current temperature: {self.temperature:.3f} | Current quality:{quality_temp}", end="\r") 
+                print(f"Current temperature: {self.temperature:.3f} | Current quality:{quality_temp}", end="\r") if DEBUG else None
                 # remove_num=int(np.ceil((self.temperature*self.quality*0.05)))
                 choice=random.choices(solution_temp,self.get_remove_probabilities(solution_temp),k=1)[0]
-                self.temperature = self.temperature * COOLING_RATE
+                if ANNEALING_MODE == "exponential":
+                    self.temperature = self.temperature * COOLING_RATE
                 self.G.remove_vertex(choice)
-                print(f"ub:{self.G.get_upper_bound()}|lb:{self.G.get_lower_bound()}")
+                # print(f"ub:{self.G.get_upper_bound()}|lb:{self.G.get_lower_bound()}")
                 continue
 
             # add a vertex if the solution is not a vertex cover
             add_candidates=self.G.get_add_candidates()
             choice=random.choices(add_candidates,self.get_add_probabilities(list(add_candidates)),k=1)[0]
             self.G.add_vertex(choice)  
-            print(f"Current temperature: {self.temperature} | Current quality:{self.G.get_solution_quality_new()}") if DEBUG else None
-            
+            # print(f"Current temperature: {self.temperature:.3f} | Current quality:{self.G.get_solution_quality_new()}", end="\r") if DEBUG else None
+        
+        # check solution
+        if G.is_vertex_cover(solution):
+
+            quality=G.get_solution_quality(solution)
+            print(f"Solution is found with quality of {quality}.")
+
+        else:
+
+            edges_covered=G.count_covered_edges(solution)
+            total_edges=G.e
+            print(f"Solution is not found in time with {edges_covered} edges covered in total {total_edges} edges.")
+
         return quality, solution
 
     def init_cover(self) -> Tuple[int, List[int]]:
@@ -132,6 +165,14 @@ class LS1:
         for node in nodes:
             probability.append(self.get_remove_probability(node))
         return probability
+
+    def get_temperature(self, profile, time):
+        for phase in profile.keys():
+            if time<phase:
+                return profile[phase]
+            else: 
+                continue
+
 
         # ===== Useful info: =====
         # > feel free to import the random module if needed, but do not worry about setting the seed as it is already set globally in exec.py
