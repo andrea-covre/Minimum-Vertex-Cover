@@ -16,7 +16,7 @@ INITIAL_TEMPERATURE = 1
 COOLING_RATE = 0.999
 END_TEMPERATURE = 0.01
 
-DEBUG=False
+DEBUG=True
 
 class LS1:
     IS_DETERMINISTIC = False
@@ -75,6 +75,7 @@ class LS1:
                 choice=random.choices(solution_temp,self.get_remove_probabilities(solution_temp),k=1)[0]
                 self.temperature = self.temperature * COOLING_RATE
                 self.G.remove_vertex(choice)
+                # print(self.G.get_lower_bound())
                 continue
 
             # add a vertex if the solution is not a vertex cover

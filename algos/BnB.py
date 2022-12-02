@@ -105,11 +105,11 @@ class BnB:
                         self.trace.add_record(quality1)
                 backtrack = True
             else:
-                LBa = Approx()
-                self.CurG = CurG
-                LBapprox,LBsol = LBa.get_vertex_cover(self.CurG,self.timer,self.trace)
-                CurLB = len(LBsol) + CurVC_size
-                #CurLB = Lowerbound(CurG) + CurVC_size
+                # LBa = Approx()
+                # self.CurG = CurG
+                # LBapprox,LBsol = LBa.get_vertex_cover(self.CurG,self.timer,self.trace)
+                # CurLB = len(LBsol) + CurVC_size
+                CurLB = Lowerbound(CurG) + CurVC_size
                 
                 if CurLB<UpperBound:
                     vj = find_maxdeg(CurG)
