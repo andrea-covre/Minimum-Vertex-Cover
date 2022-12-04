@@ -49,6 +49,8 @@ class Trace:
         self.graph = graph
         self.list = []
         self.graph_stats = []
+        self.current_memory_usage = None
+        self.peak_memory_usage = None
         
     def add_record(self, quality: int):
         """ Adds a new record to the trace """
@@ -79,7 +81,9 @@ class Trace:
                 "time": [record[0] for record in self.list],
                 "quality": [record[1] for record in self.list],
                 "graph_reads": [stat[0] for stat in self.graph_stats],
-                "vertex_cover_checks": [stat[1] for stat in self.graph_stats]
+                "vertex_cover_checks": [stat[1] for stat in self.graph_stats],
+                "current_memory_usage": self.current_memory_usage,
+                "peak_memory_usage": self.peak_memory_usage
             }
             
         # Save to JSON

@@ -9,6 +9,7 @@ $ python -m exec -inst <filename> -alg [BnB|Approx|LS1|LS2] -time <cutoff in sec
 import os
 import random
 import argparse
+import tracemalloc
 import numpy as np
 
 from graph import Graph
@@ -93,9 +94,14 @@ def main():
     
     # Running the selected algorithm
     print(f"\n>> Running {args.alg} on {instance_name}...\n")
+    tracemalloc.start()
     timer.start()
     quality, solution = algorithm.get_vertex_cover(G, timer, trace)
     time_elapsed = timer.elapsed()
+    
+    memory_usage = tracemalloc.get_traced_memory()
+    trace.current_memory_usage = memory_usage[0]
+    trace.peak_memory_usage = memory_usage[1]
     
     print("\n\n")
     print_sys_info()
