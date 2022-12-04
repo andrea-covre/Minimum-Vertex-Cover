@@ -16,7 +16,7 @@ from algos.Approx import Approx
 # TODO: print paramenters used [???]
 
 # Parameters
-INITIALIZATION_MODE = "approx"#"near_trivial" # "lognorm" | "uniform" | "normal" | "near_trivial" | "approx"
+INITIALIZATION_MODE = "approx" #"near_trivial" # "lognorm" | "uniform" | "normal" | "near_trivial" | "approx"
 POPULATION_SIZE = 500
 FITNESS_MODE = "minimizing_size_sub" # "size_penalty" | "covered_edges_focused"
 SIZE_PENALTY_MULTIPLIER = 1.1

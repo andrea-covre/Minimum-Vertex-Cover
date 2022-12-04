@@ -60,6 +60,9 @@ class Graph:
                 self.node_edges[neighbour].add(edge)
                 self.all_edges.add(edge)
                 
+        # Creating caches
+        self.count_covered_edges_cache = dict()
+                
     def get_neighbours(self, node: int) -> List[int]:
         """
         Returns the list of neighbours of the given node
@@ -107,7 +110,13 @@ class Graph:
 
     def count_covered_edges(self, vertex_cover: List[int]) -> int:
         """ Returns the number of edges covered by the given vertex cover """
-        return len(self.get_covered_edges(vertex_cover))
+        f_set = frozenset(vertex_cover)
+        if f_set in self.count_covered_edges_cache:
+            return self.count_covered_edges_cache[f_set]
+        
+        covered_edges_count = len(self.get_covered_edges(vertex_cover))
+        self.count_covered_edges_cache[f_set] = covered_edges_count
+        return covered_edges_count
     
     def is_vertex_cover(self, vertex_cover: List[int]) -> bool:
         """
