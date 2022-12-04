@@ -114,6 +114,8 @@ def main():
     print(f"{'Time elapsed:':<20} {time_elapsed} s")
     print(f"{'Graph reads:':<20} {G._accesses_count}")
     print(f"{'Vertex cover checks:':<20} {G._vertex_cover_check_count}")
+    print(f"{'Current memory usage:':<20} {memory_usage[0]}")
+    print(f"{'Peak memory usage:':<20} {memory_usage[1]}")
     print(f"{'Solution found:':<20} {solution}")
     print("")
     
