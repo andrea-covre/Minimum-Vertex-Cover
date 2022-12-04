@@ -12,16 +12,16 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 TIME_START=0
-TIME_STOP=100
-TIME_RESOLUTION=100
+TIME_STOP=1000
+TIME_RESOLUTION=200
 CUTOFF_TIMES=np.linspace(TIME_START, TIME_STOP, TIME_RESOLUTION)
 
 QUALITIES_START=2200
 QUALITIES_STOP=2260
-QUALITIES_RESOLUTION=100
+QUALITIES_RESOLUTION=200
 QUALITIES=np.linspace(QUALITIES_START, QUALITIES_STOP, QUALITIES_RESOLUTION)
 
-CUTOFF_TIMES_LOOSE=[20,40,60,80]
+CUTOFF_TIMES_LOOSE=[200,400,600,800]
 QUALITIES_LOOSE=[2200, 2210, 2220, 2230, 2240]
 
 
@@ -44,18 +44,18 @@ def calc_qrtd(trace:pd.DataFrame,cutoff_times,qualities):
     qrtd=pd.DataFrame(index=cutoff_times,columns=qualities)
     for cutoff_time in cutoff_times:
         for quality in qualities:
-            n_runs=len(trace.axes[0])
+            n_runs=len(trace[(trace.quality<=quality)].axes[0])
             n_success=len(trace[(trace.time<=cutoff_time) & (trace.quality<=quality)].axes[0])
-            qrtd.at[cutoff_time,quality]=n_success/n_runs
+            qrtd.at[cutoff_time,quality]=n_success/n_runs if n_runs!=0 else 0
     return qrtd
 
 def calc_sqd(trace,cutoff_times,qualities):
     sqd=pd.DataFrame(index=qualities, columns=cutoff_times)
     for cutoff_time in cutoff_times:
         for quality in qualities:
-            n_runs=len(trace.axes[0])
+            n_runs=len(trace[(trace.time<=cutoff_time)].axes[0])
             n_success=len(trace[(trace.time<=cutoff_time) & (trace.quality<=quality)].axes[0])
-            sqd.at[quality, cutoff_time]=n_success/n_runs
+            sqd.at[quality, cutoff_time]=n_success/n_runs if n_runs!=0 else 0
     return sqd
 
 def plot_boxplot(trace):
@@ -65,21 +65,27 @@ def plot_boxplot(trace):
 def plot_qrtd(qrtd:pd.DataFrame):
     fig, ax1 = plt.subplots()
     for column in qrtd.columns:
-        qrtd.plot(y=column, ax=ax1)
+        qrtd.plot(y=column, ax=ax1, logx=True)
+    plt.title(f"QRTD plot for {algo} on {graph}.graph")
+    plt.xlabel("cutoff time/s")
+    plt.ylabel(r"$P_{solve}$")
     plt.show()
 
 def plot_sqd(sqd:pd.DataFrame):
     fig, ax1 = plt.subplots()
     for column in sqd.columns:
         sqd.plot(y=column, ax=ax1)
+    plt.title(f"SQD plot for {algo} on {graph}.graph")
+    plt.xlabel("quality")
+    plt.ylabel(r"$P_{solve}$")
     plt.show()
 
 
 
 #%% load trace
 # import trace file from different runs 
-filename=r"C:\Users\wizar\OneDrive\Documents\github\CSE-6140-project\plotting\star\power_LS1_1000_20221203.trace"
-dirname=r"C:\Users\wizar\OneDrive\Documents\github\CSE-6140-project\plotting"
+filename=r"E:\Users\wizar\OneDrive\Documents\github\CSE-6140-project\plotting\star\power_LS1_1000_20221203.trace"
+dirname="."
 graph="power"
 algo="LS1"
 # trace=load_trace_file(filename)
