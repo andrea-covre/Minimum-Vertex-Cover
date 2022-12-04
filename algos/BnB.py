@@ -81,7 +81,6 @@ class BnB:
                     del CurG.adj[node]
                     
             elif state == 1:
-                #CurG.remove_node(vi)
                 CurG.v -= 1
                 CurG.e -= len(CurG.adj[vi])
                 for node1 in CurG.adj[vi]:
@@ -198,10 +197,11 @@ def ceil(d):
 
 #Count size of VC for LB    
 def VC_Size(VC):
-	vc_size = 0
-	for element in VC:
-		vc_size = vc_size + element[1]
-	return vc_size
+    vc_size = 0
+    for i in range(len(VC)):
+        if VC[i][1] == 1:
+            vc_size += 1;
+    return vc_size
     
  ######################
  ### YOUR CODE HERE ###
