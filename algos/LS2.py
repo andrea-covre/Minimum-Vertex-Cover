@@ -10,10 +10,6 @@ from graph import Graph
 from utils import Timer, Trace
 from algos.Approx import Approx
 
-# TODO: try adjusting parameters based on the graph size
-# TODO: clean unused/commented parts
-# TODO: clean DEBUG print statements
-# TODO: print paramenters used [???]
 
 # Parameters
 INITIALIZATION_MODE = "approx" #"near_trivial" # "lognorm" | "uniform" | "normal" | "near_trivial" | "approx"
@@ -80,15 +76,6 @@ class LS2:
             # Find mating probabilities
             mating_probabilities = self.get_mating_probability(population_fitness, total_fitness)
             
-            # print(f"Avg. Fit: {int(total_fitness/POPULATION_SIZE)}")
-            # for individual, fitness, prob in zip(population, population_fitness, mating_probabilities):
-            #     print("size", len(individual), "cov", self.G.count_covered_edges(individual), " | fitness", self.get_fitness(individual), " | prob", prob)
-            
-            # if generation == 20:
-            #     for i in range(len(population)):
-            #         print("size", len(population[i]), "fitness", population_fitness[i], "prob", mating_probabilities[i])
-            #     exit()
-            
             # Create next generation
             population = self.make_next_generation(population, mating_probabilities)
             
@@ -106,9 +93,6 @@ class LS2:
             print(f"\tGen: {generation:<4}  | Avg. Fit: {round(total_fitness/POPULATION_SIZE, 3):7.3f}\t | Avg. Size: {average_size:7.3f}\t | Std. Size: {std:5.3f}\t | Best Sol Quality: {self.quality}")
             
             generation += 1
-            
-        # for i in range(len(population)):
-        #     print(f"\t{i}: {population[i]} - {population_fitness[i]}")
             
         return self.quality, self.solution
     
