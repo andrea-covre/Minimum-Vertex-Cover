@@ -10,7 +10,7 @@ To execute the code as set by the project requirements:
 ### Running exec.py on all graphs using all algorithms
 To generate all solution and trace files from all algorithms running on all graphs: 
 <br>
-`$ python -m runner -time <cutoff in seconds> -seed <random seed>`
+`$ python -m runner -inst <directory of graphs> -time <cutoff in seconds> -seed <random seed>`
 <br>
 <br>
 ## Dependencies

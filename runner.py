@@ -3,7 +3,7 @@ This script will run exec.py for all the alogrithms and graphs to generate
 all the solution and trace files.
 
 It can be executed following the required format:
-$ python -m runner -time <cutoff in seconds> -seed <random seed>
+$ python -m runner -inst <directory of graphs> -time <cutoff in seconds> -seed <random seed>
 """
 
 import os
