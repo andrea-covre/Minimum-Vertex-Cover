@@ -1,0 +1,36 @@
+{
+    "sys_info": {
+        "platform": "Windows",
+        "platform-release": "10",
+        "platform-version": "10.0.22000",
+        "architecture": "AMD64",
+        "processor": "Intel64 Family 6 Model 158 Stepping 10, GenuineIntel",
+        "ram": "32 GB"
+    },
+    "time": [
+        4.24,
+        12.48,
+        36.66,
+        61.0
+    ],
+    "quality": [
+        3943,
+        3942,
+        3941,
+        3940
+    ],
+    "graph_reads": [
+        8361,
+        8361,
+        8361,
+        8361
+    ],
+    "vertex_cover_checks": [
+        410,
+        2424,
+        7973,
+        13462
+    ],
+    "current_memory_usage": 2922361545,
+    "peak_memory_usage": 2938989521
+}
