@@ -9,6 +9,8 @@ if %g%==s set graph=./data/star2.graph
 if %g%==p set graph=./data/power.graph
 if %a%==1 set algo=LS1
 if %a%==2 set algo=LS2
+if %a%==3 set algo=Approx
+if %a%==4 set algo=BnB
 
 set /a i=0
 :loop1

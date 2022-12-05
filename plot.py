@@ -54,7 +54,7 @@ def calc_qrtd(graph, trace: pd.DataFrame, cutoff_times, qualities):
             n_success = len(trace[(trace.time <= cutoff_time) & (
                 ((trace.quality-OPT[graph])/OPT[graph]) <= quality)].axes[0])
             qrtd.at[cutoff_time, quality] = n_success / \
-                n_runs if n_runs != 0 else 0
+                n_runs if n_runs != 0 else np.nan
     return qrtd
 
 
@@ -65,12 +65,15 @@ def calc_sqd(graph, trace, cutoff_times, qualities):
             n_runs = len(trace[(trace.time <= cutoff_time)].axes[0])
             n_success = len(trace[(trace.time <= cutoff_time) & (((trace.quality-OPT[graph])/OPT[graph])<= quality)].axes[0])
             sqd.at[quality, cutoff_time] = n_success / \
-                n_runs if n_runs != 0 else 0
+                n_runs if n_runs != 0 else np.nan
     return sqd
 
 
 def plot_boxplot(trace):
-    raise NotImplementedError("")
+    fig, ax1 = plt.subplots()
+    trace
+    plt.boxplot(trace,)
+    plt.show()
 
 
 def plot_qrtd(qrtd: pd.DataFrame):
@@ -105,7 +108,7 @@ def get_qualities(start, stop, resolution, mode):
     if mode=="linear":
         return np.round(np.linspace(start, stop, resolution),decimals=4)
     elif mode=="log":
-        return np.round(np.geomspace(stop**(resolution), stop, num=resolution),decimals=4)
+        return np.round(np.geomspace(start, stop, num=resolution),decimals=4)
     else:
         raise ValueError("mode not supported")
 
@@ -123,16 +126,18 @@ trace = load_trace_files(dirname, graph, algo)
 
 
 # Qualified Runtime for various solution qualities
-max_q=(max(trace["quality"])-OPT[graph])/OPT[graph]
-print(max_q)
-qrtd = calc_qrtd(graph, trace, get_cutoff_times(0, 1000, 200, "log"), get_qualities(0,max_q,5,"linear"))
-print(qrtd)
+# max_q=(max(trace["quality"])-OPT[graph])/OPT[graph]
+# print(max_q)
+# min_q=(min(trace["quality"])-OPT[graph])/OPT[graph]
+# print(min_q)
+# qrtd = calc_qrtd(graph, trace, get_cutoff_times(0, 1000, 200, "log"), get_qualities(min_q,max_q,5,"linear"))
+# print(qrtd)
 # Solution Quality Distributions for various run-times
 
-sqd = calc_sqd(graph, trace, get_cutoff_times(0, 1000, 5, "log"), get_qualities(0,max_q,200,"linear"))
+# sqd = calc_sqd(graph, trace, get_cutoff_times(0, 1000, 5, "log"), get_qualities(min_q,max_q,200,"linear"))
 # print(sqd)
 
 # %% plot
-plot_qrtd(qrtd)
-plot_sqd(sqd)
+# plot_qrtd(qrtd)
+# plot_sqd(sqd)
 plot_boxplot(trace)
