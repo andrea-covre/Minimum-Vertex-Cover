@@ -14,12 +14,12 @@ from algos.Approx import Approx
 # Parameters
 INITIALIZATION_MODE = "approx" #"near_trivial" # "lognorm" | "uniform" | "normal" | "near_trivial" | "approx"
 POPULATION_SIZE = 500
-FITNESS_MODE = "minimizing_size_sub" # "size_penalty" | "covered_edges_focused"
+FITNESS_MODE = "minimizing_size_sub" # "size_penalty" | "covered_edges_focused" | "minimizing_size_sub" | "minimizing_size_inverse"
 SIZE_PENALTY_MULTIPLIER = 1.1
 CROSSOVER_MODE = "remove_not_shared" # "add_not_shared" | "remove_not_shared"
 CROSSOVER_RATE = 0.5
 MUTATION_RATE = 0.8
-MUTATION_MODE = "decrease_size" # "batch" | "switch" | "decrease_size"
+MUTATION_MODE = "switch" # "batch" | "switch" | "decrease_size"
 
 class LOGNORMAL_PARAM:
     MU = 1

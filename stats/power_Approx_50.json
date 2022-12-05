@@ -1,0 +1,16 @@
+{
+    "sys_info": {
+        "platform": "Darwin",
+        "platform-release": "22.1.0",
+        "platform-version": "Darwin Kernel Version 22.1.0: Sun Oct  9 20:14:54 PDT 2022; root:xnu-8792.41.9~2/RELEASE_X86_64",
+        "architecture": "x86_64",
+        "processor": "i386",
+        "ram": "8 GB"
+    },
+    "time": [],
+    "quality": [],
+    "graph_reads": [],
+    "vertex_cover_checks": [],
+    "current_memory_usage": 163153,
+    "peak_memory_usage": 958864
+}
