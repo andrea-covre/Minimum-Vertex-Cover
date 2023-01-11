@@ -26,8 +26,9 @@ With this project we researched, implemented and analyzed different algorithms t
 - Genetic Algorithm
 
 ## Report
-
 [<img src="docs/Project_Report_Front_Page.png" alt="Report" width="65%">](docs/Project_Report.pdf)
+<br>
+See full report [here](docs/Project_Report.pdf)
 
 ## Code
 ### Instructions
